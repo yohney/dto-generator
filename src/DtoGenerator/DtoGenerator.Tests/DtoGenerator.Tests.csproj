@@ -67,6 +67,8 @@
   </Choose>
   <ItemGroup>
     <EmbeddedResource Include="CodeSamples\EntityOnlySimpleProperties.cs" />
+    <EmbeddedResource Include="CodeSamples\NoClass.cs" />
+    <EmbeddedResource Include="CodeSamples\MultipleClasses.cs" />
     <Compile Include="CodeSamples\SampleCodeProvider.cs" />
     <Compile Include="EntityParserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

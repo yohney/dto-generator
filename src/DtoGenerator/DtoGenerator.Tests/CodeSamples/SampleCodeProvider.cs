@@ -9,16 +9,17 @@ namespace DtoGenerator.Tests.CodeSamples
 {
     public static class SampleCodeProvider
     {
-        public static string EntityOnlySimpleProperties
+        public static string EntityOnlySimpleProperties => GetManifestText(nameof(EntityOnlySimpleProperties));
+        public static string NoClass => GetManifestText(nameof(NoClass));
+        public static string MultipleClasses => GetManifestText(nameof(MultipleClasses));
+
+        private static string GetManifestText(string name)
         {
-            get
+            using (var stream = typeof(SampleCodeProvider).Assembly.GetManifestResourceStream($"DtoGenerator.Tests.CodeSamples.{name}.cs"))
             {
-                using (var stream = typeof(SampleCodeProvider).Assembly.GetManifestResourceStream("DtoGenerator.Tests.CodeSamples.EntityOnlySimpleProperties.cs"))
+                using (var reader = new StreamReader(stream))
                 {
-                    using (var reader = new StreamReader(stream))
-                    {
-                        return reader.ReadToEnd();
-                    }
+                    return reader.ReadToEnd();
                 }
             }
         }

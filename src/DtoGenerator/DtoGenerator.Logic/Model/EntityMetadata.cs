@@ -8,6 +8,11 @@ namespace DtoGenerator.Logic.Model
 {
     public class EntityMetadata
     {
+        public EntityMetadata()
+        {
+            this.Properties = new List<PropertyMetadata>();
+        }
+
         public List<PropertyMetadata> Properties { get; set; }
     }
 }

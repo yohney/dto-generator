@@ -12,6 +12,26 @@ namespace DtoGenerator.Tests
     public class EntityParserTest
     {
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void EntityParser_ParseEntity_NoClassDeclarations()
+        {
+            var code = SampleCodeProvider.NoClass;
+            var metadata = EntityParser.FromString(code);
+
+            Assert.Fail("Should not reach here.");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void EntityParser_ParseEntity_MultipleClassDeclarations()
+        {
+            var code = SampleCodeProvider.MultipleClasses;
+            var metadata = EntityParser.FromString(code);
+
+            Assert.Fail("Should not reach here.");
+        }
+
+        [TestMethod]
         public void EntityParser_ParseEntity_SimplePropertiesOnly()
         {
             var code = SampleCodeProvider.EntityOnlySimpleProperties;
@@ -19,10 +39,12 @@ namespace DtoGenerator.Tests
 
             Assert.AreEqual(4, metadata.Properties.Count);
 
-            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Id" && p.IsSimpleProperty && p.Type == typeof(Int32).Name));
-            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Name" && p.IsSimpleProperty && p.Type == typeof(string).Name));
-            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Date" && p.IsSimpleProperty && p.Type == typeof(DateTime?).Name));
-            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "OtherString" && p.IsSimpleProperty && p.Type == typeof(string).Name));
+            Assert.IsTrue(metadata.Properties.All(p => p.SyntaxNode != null));
+
+            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Id" && p.IsSimpleProperty && p.Type == "int"));
+            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Name" && p.IsSimpleProperty && p.Type == "string"));
+            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Date" && p.IsSimpleProperty && p.Type == "DateTime?"));
+            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "OtherString" && p.IsSimpleProperty && p.Type == "string"));
         }
     }
 }
