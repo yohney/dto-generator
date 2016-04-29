@@ -13,7 +13,7 @@ namespace DtoGenerator.Logic.Infrastructure
 {
     public class DtoBuilder
     {
-        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto, string dtoNamespace)
+        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null)
         {
             var rawTree = existingDto == null ? BuildOutline(dtoNamespace, entity) : ClearGenerated(existingDto);
             var root = rawTree.GetRoot() as CompilationUnitSyntax;

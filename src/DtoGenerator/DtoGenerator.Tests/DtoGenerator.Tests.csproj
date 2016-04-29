@@ -71,6 +71,7 @@
     <EmbeddedResource Include="CodeSamples\MultipleClasses.cs" />
     <EmbeddedResource Include="CodeSamples\EntityWithCollectionProperties.cs" />
     <EmbeddedResource Include="CodeSamples\ComplexEntity.cs" />
+    <EmbeddedResource Include="CodeSamples\EntityOnlySimplePropertiesDto.cs" />
     <Compile Include="CodeSamples\SampleCodeProvider.cs" />
     <Compile Include="DtoBuilderTest.cs" />
     <Compile Include="EntityParserTest.cs" />
