@@ -14,5 +14,9 @@ namespace DtoGenerator.Logic.Model
         public bool IsSimpleProperty { get; set; }
 
         public PropertyDeclarationSyntax SyntaxNode { get; internal set; }
+
+        public string RelatedEntityName { get; internal set; }
+        public bool IsRelation { get; internal set; }
+        public bool IsCollection { get; internal set; }
     }
 }

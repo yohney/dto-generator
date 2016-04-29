@@ -43,11 +43,38 @@ namespace DtoGenerator.Logic.Infrastructure
                     Type = p.Type.ToString(),
                     Name = p.Identifier.Text,
                     IsSimpleProperty = IsSimpleProperty(p),
-                    SyntaxNode = p
+                    SyntaxNode = p,
+                    IsCollection = IsCollection(p),
+                    IsRelation = IsRelation(p),
+                    RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null
                 })
                 .ToList();
 
             return result;
+        }
+
+        private static string GetRelatedEntity(PropertyDeclarationSyntax p)
+        {
+            if (p.Type is GenericNameSyntax)
+                return (p.Type as GenericNameSyntax).TypeArgumentList.Arguments.OfType<IdentifierNameSyntax>().Select(i => i.Identifier.Text).Single();
+
+            if (p.Type is IdentifierNameSyntax)
+                return (p.Type as IdentifierNameSyntax).Identifier.Text;
+
+            return null;
+        }
+
+        private static bool IsRelation(PropertyDeclarationSyntax p)
+        {
+            return !IsSimpleProperty(p);
+        }
+
+        private static bool IsCollection(PropertyDeclarationSyntax p)
+        {
+            if (p.Type is GenericNameSyntax)
+                return true;
+
+            return false;
         }
 
         private static bool IsSimpleProperty(PropertyDeclarationSyntax propertyNode)

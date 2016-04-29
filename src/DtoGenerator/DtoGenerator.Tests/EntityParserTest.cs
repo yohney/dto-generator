@@ -46,5 +46,40 @@ namespace DtoGenerator.Tests
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Date" && p.IsSimpleProperty && p.Type == "DateTime?"));
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "OtherString" && p.IsSimpleProperty && p.Type == "string"));
         }
+
+        [TestMethod]
+        public void EntityParser_ParseEntity_WithCollectionProperties()
+        {
+            var code = SampleCodeProvider.EntityWithCollectionProperties;
+            var metadata = EntityParser.FromString(code);
+
+            Assert.AreEqual(6, metadata.Properties.Count);
+
+            Assert.IsTrue(metadata.Properties.All(p => !p.IsSimpleProperty));
+            Assert.IsTrue(metadata.Properties.All(p => p.IsCollection));
+            Assert.IsTrue(metadata.Properties.All(p => p.IsRelation));
+            Assert.IsTrue(metadata.Properties.All(p => p.RelatedEntityName == "Something"));
+        }
+
+        [TestMethod]
+        public void EntityParser_ParseEntity_ComplexEntity()
+        {
+            var code = SampleCodeProvider.ComplexEntity;
+            var metadata = EntityParser.FromString(code);
+
+            Assert.AreEqual(7, metadata.Properties.Count);
+
+            Assert.AreEqual(3, metadata.Properties.Count(p => p.IsSimpleProperty));
+            Assert.AreEqual(3, metadata.Properties.Count(p => p.IsCollection));
+            Assert.AreEqual(1, metadata.Properties.Count(p => p.RelatedEntityName == "OtherEntity"));
+
+            var relatedEntity = metadata.Properties
+                .Where(p => p.RelatedEntityName == "OtherEntity")
+                .FirstOrDefault();
+
+            Assert.IsTrue(relatedEntity.IsRelation);
+            Assert.IsFalse(relatedEntity.IsCollection);
+            Assert.IsFalse(relatedEntity.IsSimpleProperty);
+        }
     }
 }
