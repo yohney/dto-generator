@@ -13,6 +13,9 @@ namespace DtoGenerator.Logic.Model
             this.Properties = new List<PropertyMetadata>();
         }
 
+        public string Name { get; set; }
+        public string Namespace { get; set; }
+
         public List<PropertyMetadata> Properties { get; set; }
     }
 }

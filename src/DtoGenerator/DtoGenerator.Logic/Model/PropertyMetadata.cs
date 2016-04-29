@@ -13,10 +13,12 @@ namespace DtoGenerator.Logic.Model
         public string Type { get; set; }
         public bool IsSimpleProperty { get; set; }
 
-        public PropertyDeclarationSyntax SyntaxNode { get; internal set; }
+        public PropertyDeclarationSyntax SyntaxNode { get; set; }
 
-        public string RelatedEntityName { get; internal set; }
-        public bool IsRelation { get; internal set; }
-        public bool IsCollection { get; internal set; }
+        public string RelatedEntityName { get; set; }
+        public bool IsRelation { get; set; }
+        public bool IsCollection { get; set; }
+
+        public EntityMetadata RelationMetadata { get; set; }
     }
 }

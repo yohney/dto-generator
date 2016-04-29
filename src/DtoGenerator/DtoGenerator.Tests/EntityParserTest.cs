@@ -67,6 +67,8 @@ namespace DtoGenerator.Tests
             var code = SampleCodeProvider.ComplexEntity;
             var metadata = EntityParser.FromString(code);
 
+            Assert.AreEqual("DtoGenerator.Tests.CodeSamples", metadata.Namespace);
+            Assert.AreEqual("ComplexEntity", metadata.Name);
             Assert.AreEqual(7, metadata.Properties.Count);
 
             Assert.AreEqual(3, metadata.Properties.Count(p => p.IsSimpleProperty));

@@ -56,7 +56,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\DtoBuilder.cs" />
     <Compile Include="Infrastructure\EntityParser.cs" />
+    <Compile Include="Infrastructure\SyntaxExtenders.cs" />
+    <EmbeddedResource Include="Infrastructure\Template\Outline.cs" />
     <Compile Include="Model\EntityMetadata.cs" />
     <Compile Include="Model\PropertyMetadata.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
