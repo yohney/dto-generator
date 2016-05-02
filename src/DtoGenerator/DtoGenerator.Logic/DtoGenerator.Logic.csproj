@@ -100,6 +100,11 @@
     <Compile Include="Infrastructure\EntityParser.cs" />
     <Compile Include="Infrastructure\SyntaxExtenders.cs" />
     <EmbeddedResource Include="Infrastructure\Template\Outline.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\CustomCodeCommentWrapper.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\CustomCodeLocator.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\EmptyTreeCommentAppender.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\GeneratedCodeRemover.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\GeneratedPropertiesAppender.cs" />
     <Compile Include="Model\EntityMetadata.cs" />
     <Compile Include="Model\PropertyMetadata.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
