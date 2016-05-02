@@ -25,6 +25,11 @@ namespace DtoGenerator.Logic.Infrastructure
                 throw new ArgumentException("Source code to parse must contain exactly one class declaration!");
             }
 
+            var namespaceNode = root
+                .DescendantNodes(p => !(p is NamespaceDeclarationSyntax))
+                .OfType<NamespaceDeclarationSyntax>()
+                .FirstOrDefault();
+
             var classNode = classNodes
                 .Single();
 
@@ -37,6 +42,9 @@ namespace DtoGenerator.Logic.Infrastructure
                 .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.SetAccessorDeclaration));
             
             var result = new EntityMetadata();
+            result.Name = classNode.Identifier.Text;
+            result.Namespace = namespaceNode.Name.ToString();
+
             result.Properties = properties
                 .Select(p => new PropertyMetadata()
                 {

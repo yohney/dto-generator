@@ -32,7 +32,7 @@ namespace DtoGenerator.Tests
             var code = SampleCodeProvider.EntityOnlySimpleProperties;
             var metadata = EntityParser.FromString(code);
 
-            var existingDtoTree = CSharpSyntaxTree.ParseText(SampleCodeProvider.EntityOnlySimplePropertiesDTO);
+            var existingDtoTree = CSharpSyntaxTree.ParseText(SampleCodeProvider.EntityOnlySimplePropertiesDto);
 
             var tree = DtoBuilder.BuildDto(metadata, existingDto: existingDtoTree);
             Assert.IsNotNull(tree);
@@ -42,10 +42,19 @@ namespace DtoGenerator.Tests
             foreach (var prop in metadata.Properties)
                 Assert.IsTrue(codeText.Contains(prop.Name));
 
-            var idxOfPreviosProperty = codeText.IndexOf("public int CustomProperty { get; set; }");
-            var idxOfNewProperty = codeText.IndexOf("public DateTime? Date { get; set; }");
+            var customCodeBeginIdx = codeText.IndexOf("////BCPS/");
+            var customCodeEndIdx = codeText.IndexOf("////ECPS/");
 
-            Assert.IsTrue(idxOfNewProperty < idxOfPreviosProperty);
+            var customPropIdx = codeText.IndexOf("public int CustomProperty { get; set; }");
+            var genPropIdx = codeText.IndexOf("public DateTime? Date { get; set; }");
+
+            Assert.AreNotEqual(-1, customPropIdx);
+            Assert.AreNotEqual(-1, genPropIdx);
+            Assert.AreNotEqual(-1, customCodeBeginIdx);
+            Assert.AreNotEqual(-1, customCodeEndIdx);
+
+            Assert.IsTrue(customPropIdx > customCodeBeginIdx && customPropIdx < customCodeEndIdx);
+            Assert.IsTrue(genPropIdx > customCodeEndIdx || genPropIdx < customCodeBeginIdx);
         }
     }
 }

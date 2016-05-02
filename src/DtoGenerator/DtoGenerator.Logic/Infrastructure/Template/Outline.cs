@@ -8,9 +8,7 @@ namespace #Namespace#
 {
     public class #Entity#DTO
     {
-        ////BCPS/ BEGIN CUSTOM PROPERTY SECTION 
 
-        ////ECPS/ END CUSTOM PROPERTY SECTION
     }
 
     public class #Entity#Mapper : MapperBase<#Entity#, #Entity#DTO>
@@ -21,18 +19,14 @@ namespace #Namespace#
             {
                 return p => new #Entity#DTO()
                 {
-                    ////BCSS/ BEGIN CUSTOM SELECTOR SECTION 
 
-                    ////ECSS/ END CUSTOM SELECTOR SECTION
                 };
             }
         }
 
         public override void MapToModel(#Entity#DTO dto, #Entity# model)
         {
-            ////BCMS/ BEGIN CUSTOM MAP SECTION 
 
-            ////ECMS/ END CUSTOM MAP SECTION
         }
     }
 }
