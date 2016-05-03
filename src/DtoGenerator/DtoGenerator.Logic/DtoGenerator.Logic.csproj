@@ -58,6 +58,8 @@
       <HintPath>..\packages\Microsoft.CodeAnalysis.Workspaces.Common.1.2.1\lib\net45\Microsoft.CodeAnalysis.Workspaces.Desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable, Version=1.1.37.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Collections.Immutable.1.1.37\lib\dotnet\System.Collections.Immutable.dll</HintPath>
@@ -88,17 +90,23 @@
       <HintPath>..\packages\System.Reflection.Metadata.1.2.0\lib\portable-net45+win8\System.Reflection.Metadata.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Infrastructure\DtoBuilder.cs" />
     <Compile Include="Infrastructure\EntityParser.cs" />
     <Compile Include="Infrastructure\SyntaxExtenders.cs" />
+    <Compile Include="UI\OptionsControl.xaml.cs">
+      <DependentUpon>OptionsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\OptionsViewModel.cs" />
     <EmbeddedResource Include="Infrastructure\Template\Outline.cs" />
     <Compile Include="Infrastructure\TreeProcessing\CustomCodeCommentWrapper.cs" />
     <Compile Include="Infrastructure\TreeProcessing\CustomCodeLocator.cs" />
@@ -115,6 +123,12 @@
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="UI\OptionsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
