@@ -18,11 +18,11 @@ namespace Existing.Filled.Dto
         public IEnumerable<Something2> Somethings2 { get; set; }
         public IEnumerable<Something3> Somethings3 { get; set; }
 
-        ////BCPS/ BEGIN CUSTOM PROPERTY SECTION 
+        ////BCC/ BEGIN CUSTOM CODE SECTION 
 
         public int CustomProperty { get; set; }
 
-        ////ECPS/ END CUSTOM PROPERTY SECTION
+        ////ECC/ END CUSTOM CODE SECTION
     }
 
     public class ComplexEntityMapper : MapperBase<ComplexEntity, ComplexEntityDTO>
@@ -30,6 +30,10 @@ namespace Existing.Filled.Dto
         private Something1Mapper _something1Mapper = new Something1Mapper();
         private Something2Mapper _something2Mapper = new Something2Mapper();
         private Something3Mapper _something3Mapper = new Something3Mapper();
+
+        ////BCC/ BEGIN CUSTOM CODE SECTION 
+
+        ////ECC/ END CUSTOM CODE SECTION
 
         public override Expression<Func<ComplexEntity, ComplexEntityDTO>> SelectorExpression
         {
@@ -44,11 +48,11 @@ namespace Existing.Filled.Dto
                     Somethings2 = p.Somethings2.Select(this._something2Mapper.SelectorExpression),
                     Somethings3 = p.Somethings3.Select(this._something3Mapper.SelectorExpression),
 
-                    ////BCSS/ BEGIN CUSTOM SELECTOR SECTION 
+                    ////BCC/ BEGIN CUSTOM CODE SECTION 
 
                     CustomProperty = p.CustomProperty,
 
-                    ////ECSS/ END CUSTOM SELECTOR SECTION
+                    ////ECC/ END CUSTOM CODE SECTION
                 };
             }
         }
@@ -59,11 +63,11 @@ namespace Existing.Filled.Dto
             model.Date = dto.Date;
             model.OtherString = dto.OtherString;
 
-            ////BCMS/ BEGIN CUSTOM MAP SECTION 
+            ////BCC/ BEGIN CUSTOM CODE SECTION 
 
             model.CustomProperty = dto.CustomProperty;
 
-            ////ECMS/ END CUSTOM MAP SECTION
+            ////ECC/ END CUSTOM CODE SECTION
         }
     }
 }

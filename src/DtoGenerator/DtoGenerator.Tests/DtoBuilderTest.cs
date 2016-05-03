@@ -42,8 +42,8 @@ namespace DtoGenerator.Tests
             foreach (var prop in metadata.Properties)
                 Assert.IsTrue(codeText.Contains(prop.Name));
 
-            var customCodeBeginIdx = codeText.IndexOf("////BCPS/");
-            var customCodeEndIdx = codeText.IndexOf("////ECPS/");
+            var customCodeBeginIdx = codeText.IndexOf("////BCC/");
+            var customCodeEndIdx = codeText.IndexOf("////ECC/");
 
             var customPropIdx = codeText.IndexOf("public int CustomProperty { get; set; }");
             var genPropIdx = codeText.IndexOf("public DateTime? Date { get; set; }");
@@ -55,6 +55,22 @@ namespace DtoGenerator.Tests
 
             Assert.IsTrue(customPropIdx > customCodeBeginIdx && customPropIdx < customCodeEndIdx);
             Assert.IsTrue(genPropIdx > customCodeEndIdx || genPropIdx < customCodeBeginIdx);
+        }
+
+        [TestMethod]
+        public void DtoBuilder_ComplexEntityDto_Regenerated()
+        {
+            var code = SampleCodeProvider.ComplexEntity;
+            var metadata = EntityParser.FromString(code);
+            var otherEntityProp = metadata.Properties.Where(p => p.RelatedEntityName == "OtherEntity").Single();
+            otherEntityProp.RelationMetadata = EntityParser.FromString(SampleCodeProvider.OtherEntity);
+
+            var existingDtoTree = CSharpSyntaxTree.ParseText(SampleCodeProvider.ComplexEntityDto);
+
+            var tree = DtoBuilder.BuildDto(metadata, existingDto: existingDtoTree);
+            Assert.IsNotNull(tree);
+
+            var codeText = tree.ToString();
         }
     }
 }

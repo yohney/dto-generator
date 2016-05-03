@@ -11,7 +11,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 {
     public class CustomCodeCommentWrapper : CSharpSyntaxRewriter
     {
-        
+        public const string CustomCodeCommentBegin = "////BCC/ BEGIN CUSTOM CODE SECTION ";
+        public const string CustomCodeCommentEnd = "////ECC/ END CUSTOM CODE SECTION ";
 
         private GeneratedCodeRemover _remover;
 
@@ -19,7 +20,22 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         {
             this._remover = remover;
         }
-        
+
+        public override SyntaxNode VisitFieldDeclaration(FieldDeclarationSyntax node)
+        {
+            if (node == null)
+                return null;
+
+            var result = this.WrapWithComment(
+                node,
+                CustomCodeCommentBegin,
+                CustomCodeCommentEnd,
+                this._remover.FirstCustomMapperMember,
+                this._remover.LastCustomMapperMember);
+
+            return result ?? base.VisitFieldDeclaration(node);
+        }
+
         public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
             if (node == null)
@@ -27,8 +43,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
             var result = this.WrapWithComment(
                 node,
-                "////BCPS/ BEGIN CUSTOM PROPERTY SECTION ",
-                "////ECPS/ END CUSTOM PROPERTY SECTION ",
+                CustomCodeCommentBegin,
+                CustomCodeCommentEnd,
                 this._remover.FirstCustomProperty,
                 this._remover.LastCustomProperty);
 
@@ -42,8 +58,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
             var result = this.WrapWithComment(
                 node,
-                "////BCMS/ BEGIN CUSTOM MAPPER SECTION ",
-                "////ECMS/ END CUSTOM MAPPER SECTION ",
+                CustomCodeCommentBegin,
+                CustomCodeCommentEnd,
                 this._remover.FirstCustomMapperStatement,
                 this._remover.LastCustomMapperStatement);
 
@@ -57,8 +73,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
             var result = this.WrapWithComment(
                 node,
-                "////BCSS/ BEGIN CUSTOM SELECTOR SECTION ",
-                "////ECSS/ END CUSTOM SELECTOR SECTION ",
+                CustomCodeCommentBegin,
+                CustomCodeCommentEnd,
                 this._remover.FirstCustomSelector,
                 this._remover.LastCustomSelector);
 
@@ -78,33 +94,39 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
         private SyntaxNode WrapWithComment(SyntaxNode node, string leadingTriviaComment, string trailingTriviaComment, SyntaxNode firstOccurance, SyntaxNode lastOccurance)
         {
+            if (firstOccurance == null)
+                return null;
+
             if (_remover.CustomPropertiesCount == 1)
             {
                 if (AreNodesEqual(node, firstOccurance))
                 {
-                    var leadingTrivia = node.GetLeadingTrivia().AddRange(new[] { SyntaxFactory.Comment(leadingTriviaComment), SyntaxFactory.EndOfLine("\n") });
-                    var trailingTrivia = node.GetTrailingTrivia().Add(SyntaxFactory.Comment(trailingTriviaComment));
+                    var leadingTrivia = node.GetLeadingTrivia().AddRange(new[] { SyntaxFactory.EndOfLine("\r\n"), SyntaxFactory.Comment(leadingTriviaComment), SyntaxFactory.EndOfLine("\r\n") });
+                    var trailingTrivia = node.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine("\r\n")).Add(SyntaxFactory.Comment(trailingTriviaComment)).Add(SyntaxFactory.EndOfLine("\r\n"));
 
                     return node
                         .WithLeadingTrivia(leadingTrivia)
-                        .WithTrailingTrivia(trailingTrivia);
+                        .WithTrailingTrivia(trailingTrivia)
+                        .NormalizeWhitespace();
                 }
             }
             else
             {
                 if (AreNodesEqual(node, firstOccurance))
                 {
-                    var leadingTrivia = node.GetLeadingTrivia().Add(SyntaxFactory.Comment(leadingTriviaComment));
+                    var leadingTrivia = node.GetLeadingTrivia().Add(SyntaxFactory.EndOfLine("\r\n")).Add(SyntaxFactory.Comment(leadingTriviaComment)).Add(SyntaxFactory.EndOfLine("\r\n"));
 
                     return node
-                        .WithLeadingTrivia(leadingTrivia);
+                        .WithLeadingTrivia(leadingTrivia)
+                        .NormalizeWhitespace();
                 }
                 else if (AreNodesEqual(node, lastOccurance))
                 {
-                    var trailingTrivia = node.GetTrailingTrivia().Add(SyntaxFactory.Comment(trailingTriviaComment));
+                    var trailingTrivia = node.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine("\r\n")).Add(SyntaxFactory.Comment(trailingTriviaComment)).Add(SyntaxFactory.EndOfLine("\r\n"));
 
                     return node
-                        .WithTrailingTrivia(trailingTrivia);
+                        .WithTrailingTrivia(trailingTrivia)
+                        .NormalizeWhitespace();
                 }
             }
 

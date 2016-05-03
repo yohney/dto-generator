@@ -24,10 +24,23 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             if (node.Identifier.Text == this._metadata.Name + "DTO")
             {
                 var membersList = node.Members;
-                foreach (var prop in _metadata.Properties)
-                    membersList = membersList.Add(prop.SyntaxNode);
+                foreach (var prop in this.GenerateProperties(_metadata, ""))
+                    membersList = membersList.Add(prop);
 
                 return node.WithMembers(membersList);
+            }
+
+            if (node.Identifier.Text.Contains("Mapper"))
+            {
+                int insertIndex = 0;
+                var membersList = node.Members;
+                foreach (var prop in _metadata.Properties.Where(p => p.IsCollection))
+                {
+                    var newField = SyntaxExtenders.DeclareField(type: GenerateMapperTypeName(prop.RelatedEntityName), autoCreateNew: true);
+                    membersList = membersList.Insert(insertIndex++, newField);
+                }
+
+                return base.VisitClassDeclaration(node.WithMembers(membersList));
             }
 
             return base.VisitClassDeclaration(node);
@@ -37,22 +50,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         {
             if (node.FirstAncestorOrSelf<PropertyDeclarationSyntax>().Identifier.Text == "SelectorExpression")
             {
-                var expressions = new List<ExpressionSyntax>();
-
-                foreach (var prop in this._metadata.Properties)
-                {
-                    var exp = SyntaxFactory.AssignmentExpression(
-                        SyntaxKind.SimpleAssignmentExpression,
-                        SyntaxFactory.IdentifierName(prop.Name),
-                        SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            SyntaxFactory.IdentifierName("p"),
-                            SyntaxFactory.IdentifierName(prop.Name)));
-
-                    expressions.Add(exp);
-                }
-
-                return node.AddExpressions(expressions.ToArray());
+                return node.AddExpressions(GenerateInitializerExpressions(_metadata, "", "p.").ToArray());
             }
 
             return base.VisitInitializerExpression(node);
@@ -63,21 +61,10 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             if (node.FirstAncestorOrSelf<MethodDeclarationSyntax>() != null && node.FirstAncestorOrSelf<MethodDeclarationSyntax>().Identifier.Text == "MapToModel")
             {
                 var statements = node.Statements;
-                foreach (var prop in _metadata.Properties)
+                foreach (var prop in _metadata.Properties.Where(p => !p.IsRelation))
                 {
-                    var statement = SyntaxFactory.ExpressionStatement(
-                        SyntaxFactory.AssignmentExpression(
-                            SyntaxKind.SimpleAssignmentExpression,
-                            SyntaxFactory.MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                SyntaxFactory.IdentifierName("model"),
-                                SyntaxFactory.IdentifierName(prop.Name)),
-                            SyntaxFactory.MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                SyntaxFactory.IdentifierName("dto"),
-                                SyntaxFactory.IdentifierName(prop.Name))));
-
-                    statements = statements.Add(statement);
+                    var st = SyntaxExtenders.AssignmentStatement("model." + prop.Name, "dto." + prop.Name);
+                    statements = statements.Add(st);
                 }
 
                 return node.WithStatements(statements);
@@ -85,5 +72,71 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
             return base.VisitBlock(node);
         }
+
+        private IEnumerable<ExpressionSyntax> GenerateInitializerExpressions(EntityMetadata metadata, string propPrefix, string selectorPrefix)
+        {
+            foreach (var prop in metadata.Properties)
+            {
+                if (prop.IsCollection)
+                {
+                    var methodName = (selectorPrefix + prop.Name + ".Select");
+                    var selectorProperty = ("this." + GenerateMapperFieldName(prop.RelatedEntityName) + ".SelectorExpression");
+                    yield return SyntaxFactory.AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            SyntaxFactory.IdentifierName(prop.Name),
+                            methodName.ToMethodInvocation(selectorProperty.ToMemberAccess()))
+                        .NormalizeWhitespace(elasticTrivia: true)
+                        .AppendNewLine();
+                }
+                else if (prop.IsRelation && prop.RelationMetadata != null)
+                {
+                    foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, propPrefix + prop.RelatedEntityName, selectorPrefix + prop.RelatedEntityName + "."))
+                        yield return x;
+                }
+                else
+                {
+                    yield return SyntaxExtenders.AssignmentExpression(propPrefix + prop.Name, selectorPrefix + prop.Name).AppendNewLine();
+                }
+            }
+        }
+
+        private IEnumerable<PropertyDeclarationSyntax> GenerateProperties(EntityMetadata metadata, string prefix)
+        {
+            foreach (var prop in metadata.Properties)
+            {
+                if (prop.IsRelation && !prop.IsCollection && prop.RelationMetadata != null)
+                {
+                    foreach (var x in GenerateProperties(prop.RelationMetadata, prefix + prop.RelatedEntityName))
+                        yield return x;
+                }
+                else if(prop.IsCollection || prop.IsSimpleProperty)
+                {
+                    TypeSyntax type = null;
+                    var identifier = prefix + prop.Name;
+
+                    if (prop.IsCollection)
+                    {
+                        type = prop.RelatedEntityName.ToCollectionType("ICollection");
+                    }
+                    else
+                    {
+                        type = SyntaxFactory.IdentifierName(prop.Type);
+                    }
+
+                    yield return SyntaxExtenders.DeclareAutoProperty(type, identifier); 
+                }
+            }
+        }
+        private string GenerateMapperFieldName(string relatedEntityName)
+        {
+            var mapperType = relatedEntityName + "Mapper";
+            return "_" + char.ToLower(mapperType[0]) + mapperType.Substring(1);
+        }
+
+        private string GenerateMapperTypeName(string relatedEntityName)
+        {
+            return relatedEntityName + "Mapper";
+        }
+
     }
 }

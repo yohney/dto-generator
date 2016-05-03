@@ -11,17 +11,26 @@ namespace Existing.Filled.Dto
         public int PreviouslyGeneratedProperty1 { get; set; }
         public string PreviouslyGeneratedProperty2 { get; set; }
 
-        ////BCPS/ BEGIN CUSTOM PROPERTY SECTION 
+        ////BCC/ BEGIN CUSTOM CODE SECTION 
 
         public int CustomProperty { get; set; }
 
-        ////ECPS/ END CUSTOM PROPERTY SECTION
+        ////ECC/ END CUSTOM CODE SECTION
 
         public DateTime? PreviouslyGeneratedProperty3 { get; set; }
     }
 
     public class EntityOnlySimplePropertiesMapper : MapperBase<EntityOnlySimpleProperties, EntityOnlySimplePropertiesDTO>
     {
+        ////BCC/ BEGIN CUSTOM CODE SECTION 
+
+        public int Test()
+        {
+            return 0;
+        }
+
+        ////ECC/ END CUSTOM CODE SECTION
+
         public override Expression<Func<EntityOnlySimpleProperties, EntityOnlySimplePropertiesDTO>> SelectorExpression
         {
             get
@@ -30,11 +39,11 @@ namespace Existing.Filled.Dto
                 {
                     PreviouslyGeneratedProperty1 = p.Test1,
 
-                    ////BCSS/ BEGIN CUSTOM SELECTOR SECTION 
+                    ////BCC/ BEGIN CUSTOM CODE SECTION 
 
                     CustomProperty = p.CustomPropertyX,
 
-                    ////ECSS/ END CUSTOM SELECTOR SECTION
+                    ////ECC/ END CUSTOM CODE SECTION
 
                     PreviouslyGeneratedProperty2 = p.Test1,
                     PreviouslyGeneratedProperty3 = p.Test1,
@@ -46,11 +55,11 @@ namespace Existing.Filled.Dto
         {
             model.Property1 = dto.PreviouslyGeneratedProperty1;
 
-            ////BCMS/ BEGIN CUSTOM MAP SECTION 
+            ////BCC/ BEGIN CUSTOM CODE SECTION 
 
             model.CustomProperty = dto.CustomProperty;
 
-            ////ECMS/ END CUSTOM MAP SECTION
+            ////ECC/ END CUSTOM CODE SECTION
 
             model.Property2 = dto.PreviouslyGeneratedProperty2;
         }

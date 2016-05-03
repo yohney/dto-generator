@@ -11,6 +11,16 @@ namespace DtoGenerator.Logic.Infrastructure
 {
     public static class SyntaxExtenders
     {
+        public static TypeSyntax ToCollectionType(this string type, string collectionType)
+        {
+            return SyntaxFactory.GenericName(
+                    SyntaxFactory.Identifier(collectionType))
+                .WithTypeArgumentList(
+                    SyntaxFactory.TypeArgumentList(
+                        SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                            SyntaxFactory.IdentifierName(type))));
+        }
+
         public static NameSyntax SyntaxNameFromFullName(this string fullName)
         {
             if (fullName.Count(p => p == '.') == 0)
@@ -25,66 +35,119 @@ namespace DtoGenerator.Logic.Infrastructure
             return SyntaxFactory.QualifiedName(nameLeft, SyntaxFactory.IdentifierName(parts.Last()));
         }
 
-        public static UsingDirectiveSyntax ToUsing(this string @namespace)
+        public static TNode AppendNewLine<TNode>(this TNode node, bool preserveExistingTrivia = true)
+            where TNode : SyntaxNode
         {
-            return @namespace.SyntaxNameFromFullName().ToUsing();
+            var triviaList = preserveExistingTrivia == true ? node.GetTrailingTrivia() : SyntaxFactory.TriviaList();
+            triviaList = triviaList.Add(SyntaxFactory.EndOfLine("\r\n"));
+
+            return node.WithTrailingTrivia(triviaList);
         }
 
-        public static UsingDirectiveSyntax ToUsing(this NameSyntax nameSyntaxNode)
+        public static FieldDeclarationSyntax DeclareField(string type, bool autoCreateNew)
         {
-            return SyntaxFactory.UsingDirective(nameSyntaxNode);
+            var fieldName = "_" + char.ToLower(type[0]) + type.Substring(1);
+
+            return SyntaxFactory.FieldDeclaration(
+                        SyntaxFactory.VariableDeclaration(
+                            SyntaxFactory.IdentifierName(type))
+                        .WithVariables(
+                            SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
+                                SyntaxFactory.VariableDeclarator(
+                                    SyntaxFactory.Identifier(fieldName))
+                                .WithInitializer(
+                                    SyntaxFactory.EqualsValueClause(
+                                        SyntaxFactory.ObjectCreationExpression(
+                                            SyntaxFactory.IdentifierName(type))
+                                        .WithArgumentList(
+                                            SyntaxFactory.ArgumentList()))))))
+                        .WithModifiers(
+                            SyntaxFactory.TokenList(
+                                SyntaxFactory.Token(SyntaxKind.PrivateKeyword)))
+                            .NormalizeWhitespace(elasticTrivia: true)
+                        .AppendNewLine();
         }
 
-        public static NamespaceDeclarationSyntax ToNamespaceDirective(this string @namespace)
+        public static ExpressionStatementSyntax AssignmentStatement(string left, string right)
         {
-            return SyntaxFactory.NamespaceDeclaration(@namespace.SyntaxNameFromFullName());
+            return SyntaxFactory.ExpressionStatement(AssignmentExpression(left, right))
+                       .NormalizeWhitespace(elasticTrivia: true)
+                       .AppendNewLine();
         }
 
-        public static TypeSyntax ToGenericType(this string typeName, params TypeSyntax[] genArguments)
+        public static InvocationExpressionSyntax ToMethodInvocation(this string method, params ExpressionSyntax[] args)
         {
-            var result = new List<SyntaxNodeOrToken>();
-            foreach (var baseArg in genArguments)
+            var argSyntaxes = args.Select(p => SyntaxFactory.Argument(p));
+
+            return SyntaxFactory.InvocationExpression(
+                            method.ToMemberAccess())
+                        .WithArgumentList(
+                            SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(argSyntaxes)));
+        }
+
+        public static ExpressionSyntax ToMemberAccess(this string selector)
+        {
+            var parts = selector.Split('.');
+
+            if(parts.Count() == 1)
             {
-                result.Add(baseArg);
-                result.Add(SyntaxFactory.Token(SyntaxKind.CommaToken));
+                return SyntaxFactory.IdentifierName(parts.First());
             }
-
-            result.RemoveAt(result.Count - 1);
-
-            return SyntaxFactory.GenericName(SyntaxFactory.Identifier(typeName))
-                        .WithTypeArgumentList(SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList<TypeSyntax>(result.ToArray())));
-        }
-
-        public static TypeSyntax ToGenericType(this string typeName, params string[] genArguments)
-        {
-            return typeName.ToGenericType(genArguments.Select(p => SyntaxFactory.IdentifierName(p)).ToArray());
-        }
-
-        public static ClassDeclarationSyntax ToClassDeclaration(this string className, bool isPublic = true, string baseClassName = null, IEnumerable<string> baseClassGenericArguments = null)
-        {
-            var ret = SyntaxFactory.ClassDeclaration(className);
-
-            if (isPublic)
-                ret = ret.WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)));
-
-            if(baseClassName != null)
+            else if (parts.Count() == 2)
             {
-                TypeSyntax baseClassTypeSyntax;
-
-                if (baseClassGenericArguments == null)
-                    baseClassTypeSyntax = SyntaxFactory.IdentifierName(baseClassName);
-                else
+                if(parts.First() == "this")
                 {
-                    baseClassTypeSyntax = baseClassName.ToGenericType(baseClassGenericArguments.ToArray());
+                    return SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.ThisExpression(),
+                        SyntaxFactory.IdentifierName(parts.Last()));
                 }
-
-                ret = ret.WithBaseList(
-                        SyntaxFactory.BaseList(
-                            SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(
-                                SyntaxFactory.SimpleBaseType(baseClassTypeSyntax))));
+                    
+                return SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName(parts.First()),
+                        SyntaxFactory.IdentifierName(parts.Last()));
             }
+            else
+            {
+                var leftPart = string.Join(".", parts.Take(parts.Count() - 1));
+                return SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        leftPart.ToMemberAccess(),
+                        SyntaxFactory.IdentifierName(parts.Last()));
+            }
+        }
 
-            return ret;
+        public static PropertyDeclarationSyntax DeclareAutoProperty(TypeSyntax type, string identifier)
+        {
+            return SyntaxFactory.PropertyDeclaration(
+                    type,
+                    SyntaxFactory.Identifier(identifier))
+                .WithModifiers(
+                    SyntaxFactory.TokenList(
+                        SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                .WithAccessorList(
+                    SyntaxFactory.AccessorList(
+                        SyntaxFactory.List<AccessorDeclarationSyntax>(
+                            new AccessorDeclarationSyntax[]{
+                                SyntaxFactory.AccessorDeclaration(
+                                    SyntaxKind.GetAccessorDeclaration)
+                                .WithSemicolonToken(
+                                    SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
+                                SyntaxFactory.AccessorDeclaration(
+                                    SyntaxKind.SetAccessorDeclaration)
+                                .WithSemicolonToken(
+                                    SyntaxFactory.Token(SyntaxKind.SemicolonToken))})))
+                .NormalizeWhitespace(elasticTrivia: true)
+                .AppendNewLine();
+        }
+
+        public static ExpressionSyntax AssignmentExpression(string left, string right)
+        {
+            return SyntaxFactory.AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                left.ToMemberAccess(),
+                right.ToMemberAccess());
         }
     }
 }
