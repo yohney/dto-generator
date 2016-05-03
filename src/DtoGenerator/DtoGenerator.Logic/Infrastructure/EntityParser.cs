@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DtoGenerator.Logic.Model;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -14,13 +15,24 @@ namespace DtoGenerator.Logic.Infrastructure
         public static EntityMetadata FromString(string code)
         {
             var syntaxTree = CSharpSyntaxTree.ParseText(code);
+            return FromSyntaxTree(syntaxTree);
+        }
+
+        public static EntityMetadata FromDocument(Document doc)
+        {
+            var syntaxTree = doc.GetSyntaxTreeAsync().Result;
+            return FromSyntaxTree(syntaxTree);
+        }
+
+        private static EntityMetadata FromSyntaxTree(SyntaxTree syntaxTree)
+        {
             var root = syntaxTree.GetRoot();
 
             var classNodes = root
                 .DescendantNodes(p => !(p is ClassDeclarationSyntax))
                 .OfType<ClassDeclarationSyntax>();
 
-            if(classNodes.Count() != 1)
+            if (classNodes.Count() != 1)
             {
                 throw new ArgumentException("Source code to parse must contain exactly one class declaration!");
             }
@@ -40,7 +52,7 @@ namespace DtoGenerator.Logic.Infrastructure
                 .Where(p => p.AccessorList != null)
                 .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.GetAccessorDeclaration))
                 .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.SetAccessorDeclaration));
-            
+
             var result = new EntityMetadata();
             result.Name = classNode.Identifier.Text;
             result.Namespace = namespaceNode.Name.ToString();
@@ -60,6 +72,7 @@ namespace DtoGenerator.Logic.Infrastructure
 
             return result;
         }
+        
 
         private static string GetRelatedEntity(PropertyDeclarationSyntax p)
         {

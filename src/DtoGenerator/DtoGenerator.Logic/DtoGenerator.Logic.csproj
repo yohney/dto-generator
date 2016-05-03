@@ -97,6 +97,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +108,7 @@
       <DependentUpon>OptionsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\OptionsViewModel.cs" />
+    <Compile Include="UI\ViewModelBase.cs" />
     <EmbeddedResource Include="Infrastructure\Template\Outline.cs" />
     <Compile Include="Infrastructure\TreeProcessing\CustomCodeCommentWrapper.cs" />
     <Compile Include="Infrastructure\TreeProcessing\CustomCodeLocator.cs" />
