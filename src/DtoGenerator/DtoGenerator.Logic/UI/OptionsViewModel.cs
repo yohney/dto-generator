@@ -28,7 +28,7 @@ namespace DtoGenerator.Logic.UI
             this.DtoLocation = doc.Project.Solution.Projects
                 .SelectMany(p => p.Documents)
                 .Where(p => p.Name.ToLower().Contains("dto"))
-                .Select(p => string.Join("/", p.Folders))
+                .Select(p => p.Project.Name + "/" + string.Join("/", p.Folders))
                 .FirstOrDefault();
         }
 
