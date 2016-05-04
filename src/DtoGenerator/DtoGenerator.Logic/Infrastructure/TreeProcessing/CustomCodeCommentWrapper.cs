@@ -101,32 +101,41 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             {
                 if (AreNodesEqual(node, firstOccurance))
                 {
-                    var leadingTrivia = node.GetLeadingTrivia().AddRange(new[] { SyntaxFactory.EndOfLine("\r\n"), SyntaxFactory.Comment(leadingTriviaComment), SyntaxFactory.EndOfLine("\r\n") });
-                    var trailingTrivia = node.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine("\r\n")).Add(SyntaxFactory.Comment(trailingTriviaComment)).Add(SyntaxFactory.EndOfLine("\r\n"));
+                    var leadingTrivia = node.GetLeadingTrivia().AddRange(new[] {
+                        SyntaxExtenders.EndOfLineTrivia,
+                        SyntaxFactory.Comment(leadingTriviaComment),
+                        SyntaxExtenders.EndOfLineTrivia });
+                    var trailingTrivia = node.GetTrailingTrivia()
+                        .Add(SyntaxExtenders.EndOfLineTrivia)
+                        .Add(SyntaxFactory.Comment(trailingTriviaComment))
+                        .Add(SyntaxExtenders.EndOfLineTrivia);
 
                     return node
                         .WithLeadingTrivia(leadingTrivia)
-                        .WithTrailingTrivia(trailingTrivia)
-                        .NormalizeWhitespace();
+                        .WithTrailingTrivia(trailingTrivia);
                 }
             }
             else
             {
                 if (AreNodesEqual(node, firstOccurance))
                 {
-                    var leadingTrivia = node.GetLeadingTrivia().Add(SyntaxFactory.EndOfLine("\r\n")).Add(SyntaxFactory.Comment(leadingTriviaComment)).Add(SyntaxFactory.EndOfLine("\r\n"));
+                    var leadingTrivia = node.GetLeadingTrivia()
+                        .Add(SyntaxExtenders.EndOfLineTrivia)
+                        .Add(SyntaxFactory.Comment(leadingTriviaComment))
+                        .Add(SyntaxExtenders.EndOfLineTrivia);
 
                     return node
-                        .WithLeadingTrivia(leadingTrivia)
-                        .NormalizeWhitespace();
+                        .WithLeadingTrivia(leadingTrivia);
                 }
                 else if (AreNodesEqual(node, lastOccurance))
                 {
-                    var trailingTrivia = node.GetTrailingTrivia().Add(SyntaxFactory.EndOfLine("\r\n")).Add(SyntaxFactory.Comment(trailingTriviaComment)).Add(SyntaxFactory.EndOfLine("\r\n"));
+                    var trailingTrivia = node.GetTrailingTrivia()
+                        .Add(SyntaxExtenders.EndOfLineTrivia)
+                        .Add(SyntaxFactory.Comment(trailingTriviaComment))
+                        .Add(SyntaxExtenders.EndOfLineTrivia);
 
                     return node
-                        .WithTrailingTrivia(trailingTrivia)
-                        .NormalizeWhitespace();
+                        .WithTrailingTrivia(trailingTrivia);
                 }
             }
 

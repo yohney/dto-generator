@@ -23,7 +23,13 @@ namespace DtoGenerator.Tests
             var codeText = tree.ToString();
 
             foreach (var prop in metadata.Properties)
-                Assert.IsTrue(codeText.Contains(prop.Name));
+            {
+                Assert.IsTrue(codeText.Contains($"public {prop.Type} {prop.Name} {{ get; set; }}"));
+                Assert.IsTrue(codeText.Contains($"{prop.Name} = p.{prop.Name},"));
+                Assert.IsFalse(codeText.Contains($",{prop.Name} = p.{prop.Name}"));
+
+                Assert.IsTrue(codeText.Contains($"model.{prop.Name} = dto.{prop.Name};"));
+            }
         }
 
         [TestMethod]
@@ -40,7 +46,13 @@ namespace DtoGenerator.Tests
             var codeText = tree.ToString();
 
             foreach (var prop in metadata.Properties)
-                Assert.IsTrue(codeText.Contains(prop.Name));
+            {
+                Assert.IsTrue(codeText.Contains($"public {prop.Type} {prop.Name} {{ get; set; }}"));
+                Assert.IsTrue(codeText.Contains($"{prop.Name} = p.{prop.Name},"));
+                Assert.IsFalse(codeText.Contains($",{prop.Name} = p.{prop.Name}"));
+
+                Assert.IsTrue(codeText.Contains($"model.{prop.Name} = dto.{prop.Name};"));
+            }
 
             var customCodeBeginIdx = codeText.IndexOf("////BCC/");
             var customCodeEndIdx = codeText.IndexOf("////ECC/");

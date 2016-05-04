@@ -37,8 +37,13 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         {
             return SyntaxFactory.TriviaList(
                         new[]{
+                            SyntaxExtenders.EndOfLineTrivia,
                             SyntaxFactory.Comment(CustomCodeCommentWrapper.CustomCodeCommentBegin),
-                            SyntaxFactory.Comment(CustomCodeCommentWrapper.CustomCodeCommentEnd)});
+                            SyntaxExtenders.EndOfLineTrivia,
+                            SyntaxExtenders.EndOfLineTrivia,
+                            SyntaxFactory.Comment(CustomCodeCommentWrapper.CustomCodeCommentEnd),
+                            SyntaxExtenders.EndOfLineTrivia,
+                            SyntaxExtenders.EndOfLineTrivia});
         }
     }
 }

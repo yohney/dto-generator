@@ -11,6 +11,10 @@ namespace DtoGenerator.Logic.Infrastructure
 {
     public static class SyntaxExtenders
     {
+        public const string NewLine = "\r\n";
+
+        public static SyntaxTrivia EndOfLineTrivia => SyntaxFactory.EndOfLine(NewLine);
+
         public static TypeSyntax ToCollectionType(this string type, string collectionType)
         {
             return SyntaxFactory.GenericName(
@@ -39,7 +43,7 @@ namespace DtoGenerator.Logic.Infrastructure
             where TNode : SyntaxNode
         {
             var triviaList = preserveExistingTrivia == true ? node.GetTrailingTrivia() : SyntaxFactory.TriviaList();
-            triviaList = triviaList.Add(SyntaxFactory.EndOfLine("\r\n"));
+            triviaList = triviaList.Add(SyntaxExtenders.EndOfLineTrivia);
 
             return node.WithTrailingTrivia(triviaList);
         }
@@ -121,33 +125,68 @@ namespace DtoGenerator.Logic.Infrastructure
         public static PropertyDeclarationSyntax DeclareAutoProperty(TypeSyntax type, string identifier)
         {
             return SyntaxFactory.PropertyDeclaration(
-                    type,
-                    SyntaxFactory.Identifier(identifier))
+                    type.AppendWhitespace(),
+                    SyntaxFactory.Identifier(identifier).AppendWhitespace())
                 .WithModifiers(
                     SyntaxFactory.TokenList(
-                        SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                        SyntaxFactory.Token(SyntaxKind.PublicKeyword).AppendWhitespace()
+                        ))
                 .WithAccessorList(
                     SyntaxFactory.AccessorList(
                         SyntaxFactory.List<AccessorDeclarationSyntax>(
                             new AccessorDeclarationSyntax[]{
-                                SyntaxFactory.AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration)
-                                .WithSemicolonToken(
-                                    SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
-                                SyntaxFactory.AccessorDeclaration(
-                                    SyntaxKind.SetAccessorDeclaration)
-                                .WithSemicolonToken(
-                                    SyntaxFactory.Token(SyntaxKind.SemicolonToken))})))
-                .NormalizeWhitespace(elasticTrivia: true)
+                                PropertyAccessor(PropertyAccessorType.Get),
+                                PropertyAccessor(PropertyAccessorType.Set)
+                            })))
                 .AppendNewLine();
+        }
+
+        public static AccessorDeclarationSyntax PropertyAccessor(PropertyAccessorType type)
+        {
+            var syntaxKind = type == PropertyAccessorType.Get ? SyntaxKind.GetAccessorDeclaration : SyntaxKind.SetAccessorDeclaration;
+
+            var accessor = SyntaxFactory.AccessorDeclaration(syntaxKind).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)).AppendWhitespace();
+
+            if (type == PropertyAccessorType.Get)
+                accessor = accessor.PrependWhitespace();
+
+            return accessor;
+        }
+
+        public static TNode PrependWhitespace<TNode>(this TNode node)
+            where TNode : SyntaxNode
+        {
+            return node.WithLeadingTrivia(node.GetLeadingTrivia().Add(SyntaxFactory.Whitespace(" ")));
+        }
+
+        public static TNode AppendWhitespace<TNode>(this TNode node)
+            where TNode: SyntaxNode
+        {
+            return node.WithTrailingTrivia(node.GetTrailingTrivia().Add(SyntaxFactory.Whitespace(" ")));
+        }
+
+        public static SyntaxToken AppendWhitespace(this SyntaxToken token)
+        {
+            return token.WithTrailingTrivia(token.TrailingTrivia.Add(SyntaxFactory.Whitespace(" ")));
+        }
+
+        public static SyntaxToken AppendNewLine(this SyntaxToken token)
+        {
+            return token.WithTrailingTrivia(token.TrailingTrivia.Add(EndOfLineTrivia));
         }
 
         public static ExpressionSyntax AssignmentExpression(string left, string right)
         {
             return SyntaxFactory.AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
-                left.ToMemberAccess(),
-                right.ToMemberAccess());
+                left.ToMemberAccess().AppendWhitespace(),
+                right.ToMemberAccess().PrependWhitespace());
+        }
+
+        public enum PropertyAccessorType
+        {
+            Get,
+            Set
         }
     }
 }

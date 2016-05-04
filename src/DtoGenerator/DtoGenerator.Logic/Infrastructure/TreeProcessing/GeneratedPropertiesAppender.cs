@@ -50,7 +50,15 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         {
             if (node.FirstAncestorOrSelf<PropertyDeclarationSyntax>().Identifier.Text == "SelectorExpression")
             {
-                return node.AddExpressions(GenerateInitializerExpressions(_metadata, "", "p.").ToArray());
+                var initializerExpressions = GenerateInitializerExpressions(_metadata, "", "p.").ToList();
+                var nodeTokenList = SyntaxFactory.NodeOrTokenList();
+                foreach(var exp in initializerExpressions)
+                {
+                    nodeTokenList = nodeTokenList.Add(exp);
+                    nodeTokenList = nodeTokenList.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).AppendNewLine());
+                }
+
+                return node.WithExpressions(SyntaxFactory.SeparatedList<ExpressionSyntax>(nodeTokenList));
             }
 
             return base.VisitInitializerExpression(node);
@@ -83,10 +91,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     var selectorProperty = ("this." + GenerateMapperFieldName(prop.RelatedEntityName) + ".SelectorExpression");
                     yield return SyntaxFactory.AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,
-                            SyntaxFactory.IdentifierName(prop.Name),
-                            methodName.ToMethodInvocation(selectorProperty.ToMemberAccess()))
-                        .NormalizeWhitespace(elasticTrivia: true)
-                        .AppendNewLine();
+                            SyntaxFactory.IdentifierName(prop.Name).AppendWhitespace(),
+                            methodName.ToMethodInvocation(selectorProperty.ToMemberAccess()).PrependWhitespace());
                 }
                 else if (prop.IsRelation && prop.RelationMetadata != null)
                 {
@@ -95,7 +101,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 }
                 else
                 {
-                    yield return SyntaxExtenders.AssignmentExpression(propPrefix + prop.Name, selectorPrefix + prop.Name).AppendNewLine();
+                    yield return SyntaxExtenders.AssignmentExpression(propPrefix + prop.Name, selectorPrefix + prop.Name);
                 }
             }
         }
