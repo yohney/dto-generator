@@ -14,6 +14,8 @@ namespace DtoGenerator.Logic.Model
         }
 
         public string Name { get; set; }
+        public string DtoName => Name + "DTO";
+
         public string Namespace { get; set; }
 
         public List<PropertyMetadata> Properties { get; set; }

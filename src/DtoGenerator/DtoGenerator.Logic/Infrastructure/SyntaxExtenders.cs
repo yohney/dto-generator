@@ -39,6 +39,17 @@ namespace DtoGenerator.Logic.Infrastructure
             return SyntaxFactory.QualifiedName(nameLeft, SyntaxFactory.IdentifierName(parts.Last()));
         }
 
+        public static UsingDirectiveSyntax ToUsing(this string @namespace)
+        {
+            return @namespace.SyntaxNameFromFullName().ToUsing();
+        }
+
+        public static UsingDirectiveSyntax ToUsing(this NameSyntax nameSyntaxNode)
+        {
+            return SyntaxFactory.UsingDirective(nameSyntaxNode.PrependWhitespace()).AppendNewLine();
+        }
+
+
         public static TNode AppendNewLine<TNode>(this TNode node, bool preserveExistingTrivia = true)
             where TNode : SyntaxNode
         {

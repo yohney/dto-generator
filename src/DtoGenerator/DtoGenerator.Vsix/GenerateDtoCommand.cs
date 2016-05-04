@@ -13,6 +13,7 @@ using DtoGenerator.Logic.Infrastructure;
 using DtoGenerator.Logic.UI;
 using DtoGenerator.Vsix.UI;
 using EnvDTE;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
@@ -148,7 +149,7 @@ namespace DtoGenerator.Vsix
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
-        private void MenuItemCallback(object sender, EventArgs e)
+        private async void MenuItemCallback(object sender, EventArgs e)
         {
             var componentModel = (IComponentModel)Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SComponentModel));
             var workspace = componentModel.GetService<VisualStudioWorkspace>();
@@ -160,17 +161,37 @@ namespace DtoGenerator.Vsix
                 .FirstOrDefault();
 
             var vm = new OptionsViewModel(doc);
-            new OptionsWindow { DataContext = vm }.ShowModal();
+            var isConfirmed = new OptionsWindow { DataContext = vm }.ShowModal();
 
-            var project = doc.Project.Solution.Projects
-                .Where(p => p.Name.Contains(vm.DtoLocation.Split('/').First()))
-                .FirstOrDefault();
+            if(isConfirmed == true)
+            {
+                var project = doc.Project.Solution.Projects
+                    .Where(p => p.Name.Contains(vm.DtoLocation.Split('/').First()))
+                    .FirstOrDefault();
 
-            var syntaxTree = DtoBuilder.BuildDto(vm.EntityModel.ConvertToMetadata());
-            var formatted = Formatter.Format(syntaxTree.GetRoot(), workspace);
+                var metadata = vm.EntityModel.ConvertToMetadata();
 
-            var newDoc = project.AddDocument(doc.Name.Replace(".cs", "DTO.cs"), formatted, folders: vm.DtoLocation.Split('/').Skip(1));
-            workspace.TryApplyChanges(newDoc.Project.Solution);
+                var compilation = await project.GetCompilationAsync();
+                var existingDtoDocument = compilation.GetDocumentForSymbol(project.Solution, metadata.DtoName);
+
+                SyntaxTree existingSyntaxTree = null;
+                if (existingDtoDocument != null)
+                    existingSyntaxTree = await existingDtoDocument.GetSyntaxTreeAsync();
+
+                var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: vm.DtoLocation.Replace('/', '.'), existingDto: existingSyntaxTree);
+                var formatted = Formatter.Format(syntaxTree.GetRoot(), workspace);
+
+                if (existingDtoDocument == null)
+                {
+                    var newDoc = project.AddDocument(doc.Name.Replace(".cs", "DTO.cs"), formatted, folders: vm.DtoLocation.Split('/').Skip(1));
+                    workspace.TryApplyChanges(newDoc.Project.Solution);
+                }
+                else
+                {
+                    var newDoc = existingDtoDocument.WithSyntaxRoot(syntaxTree.GetRoot());
+                    workspace.TryApplyChanges(newDoc.Project.Solution);
+                }
+            }
         }
     }
 }

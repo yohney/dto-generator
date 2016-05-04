@@ -6,9 +6,10 @@
         xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         MinHeight="480" MinWidth="640" Height="768" Width="1024"
+        IsCloseButtonEnabled="False"
         Background="#FFF0F0F0"
         ShowInTaskbar="False" WindowStartupLocation="CenterScreen">
     <Grid>
-        <UI:OptionsControl x:Name="container" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <UI:OptionsControl x:Name="container" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OnCancel="container_OnCancel" OnConfirm="container_OnConfirm" />
     </Grid>
 </platformUI:DialogWindow>

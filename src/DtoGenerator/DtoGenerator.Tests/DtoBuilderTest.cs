@@ -30,6 +30,8 @@ namespace DtoGenerator.Tests
 
                 Assert.IsTrue(codeText.Contains($"model.{prop.Name} = dto.{prop.Name};"));
             }
+
+            Assert.IsTrue(codeText.Contains("using DtoGenerator.Tests.CodeSamples;"));
         }
 
         [TestMethod]

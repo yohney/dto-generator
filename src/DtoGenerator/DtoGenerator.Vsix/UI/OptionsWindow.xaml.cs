@@ -24,5 +24,17 @@ namespace DtoGenerator.Vsix.UI
         {
             InitializeComponent();
         }
+
+        private void container_OnCancel(object sender, EventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
+        }
+
+        private void container_OnConfirm(object sender, EventArgs e)
+        {
+            this.DialogResult = true;
+            this.Close();
+        }
     }
 }

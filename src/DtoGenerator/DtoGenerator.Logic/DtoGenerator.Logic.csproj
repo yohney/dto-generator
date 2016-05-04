@@ -109,6 +109,7 @@
   <ItemGroup>
     <Compile Include="Infrastructure\DtoBuilder.cs" />
     <Compile Include="Infrastructure\EntityParser.cs" />
+    <Compile Include="Infrastructure\SymbolExtenders.cs" />
     <Compile Include="Infrastructure\SyntaxExtenders.cs" />
     <Compile Include="UI\OptionsControl.xaml.cs">
       <DependentUpon>OptionsControl.xaml</DependentUpon>

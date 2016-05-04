@@ -54,6 +54,16 @@ namespace DtoGenerator.Logic.Infrastructure
             var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity);
             root = generatedPropertiesAppender.Visit(root) as CompilationUnitSyntax;
 
+            var usingDirective = root.DescendantNodes(p => !(p is ClassDeclarationSyntax))
+                .OfType<UsingDirectiveSyntax>()
+                .Where(p => p.Name.ToString() == entity.Namespace)
+                .FirstOrDefault();
+
+            if (usingDirective == null)
+            {
+                root = root.WithUsings(root.Usings.Add(entity.Namespace.ToUsing()));
+            }
+
             return SyntaxFactory.SyntaxTree(root);
         }
 

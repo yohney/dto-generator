@@ -28,7 +28,9 @@ namespace DtoGenerator.Logic.UI
             this.DtoLocation = doc.Project.Solution.Projects
                 .SelectMany(p => p.Documents)
                 .Where(p => p.Name.ToLower().Contains("dto"))
-                .Select(p => p.Project.Name + "/" + string.Join("/", p.Folders))
+                .GroupBy(p => p.Project.Name + "/" + string.Join("/", p.Folders))
+                .OrderByDescending(p => p.Count())
+                .Select(p => p.Key)
                 .FirstOrDefault();
         }
 
@@ -103,21 +105,7 @@ namespace DtoGenerator.Logic.UI
         public async Task<EntityViewModel> GetRelatedEntity(string entityName)
         {
             var compilation = await this.EntityDocument.Project.GetCompilationAsync();
-            var relatedSymbols = compilation.GetSymbolsWithName(p => p == entityName, SymbolFilter.Type)
-                .ToList();
-
-            if (relatedSymbols.Count != 1)
-                return null;
-
-            var location = relatedSymbols
-                .Select(p => p.Locations.FirstOrDefault())
-                .FirstOrDefault();
-
-            var docId = this.EntityDocument.Project.Solution
-                .GetDocumentIdsWithFilePath(location.SourceTree.FilePath)
-                .FirstOrDefault();
-
-            var doc = this.EntityDocument.Project.Solution.GetDocument(docId);
+            var doc = compilation.GetDocumentForSymbol(this.EntityDocument.Project.Solution, entityName);
             return new EntityViewModel(doc);
         }
 
