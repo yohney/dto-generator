@@ -16,22 +16,19 @@ namespace DtoGenerator.Logic.UI
 {
     public class OptionsViewModel : ViewModelBase
     {
-        public OptionsViewModel()
+        public static async Task<OptionsViewModel> Create(Document doc)
         {
+            var instance = new OptionsViewModel();
 
+            instance.DtoLocation = doc.Project.Solution.GetMostLikelyDtoLocation();
+            instance.EntityModel = await EntityViewModel.CreateRecursive(doc, depth: 3);
+
+            return instance;
         }
 
-        public OptionsViewModel(Document doc)
+        private OptionsViewModel()
         {
-            this._entityModel = new EntityViewModel(doc);
 
-            this.DtoLocation = doc.Project.Solution.Projects
-                .SelectMany(p => p.Documents)
-                .Where(p => p.Name.ToLower().Contains("dto"))
-                .GroupBy(p => p.Project.Name + "/" + string.Join("/", p.Folders))
-                .OrderByDescending(p => p.Count())
-                .Select(p => p.Key)
-                .FirstOrDefault();
         }
 
         private string _dtoLocation;
@@ -79,39 +76,60 @@ namespace DtoGenerator.Logic.UI
 
     public class EntityViewModel : ViewModelBase
     {
-        public EntityViewModel(Document doc)
-        {
-            this.EntityDocument = doc;
-            this.Properties = new ObservableCollection<PropertyViewModel>();
+        private EntityMetadata _originalMetadata;
 
-            var metadata = EntityParser.FromDocument(doc);
-            this.EntityName = metadata.Name;
-
-            foreach(var p in metadata.Properties)
-            {
-                var propViewModel = new PropertyViewModel(this);
-                propViewModel.CanExpand = p.IsRelation && !p.IsCollection;
-                propViewModel.Name = p.Name;
-                propViewModel.Type = p.IsCollection ? $"Collection<{p.Type}>" : p.Type;
-                propViewModel.CanSelect = true;
-                this.Properties.Add(propViewModel);
-            }
-        }
-
-        public Document EntityDocument { get; set; }
         public string EntityName { get; set; }
         public ObservableCollection<PropertyViewModel> Properties { get; set; }
 
-        public async Task<EntityViewModel> GetRelatedEntity(string entityName)
+        public static async Task<EntityViewModel> CreateRecursive(Document doc, int depth = 3, bool autoSelect = true, bool canSelectCollections = true)
         {
-            var compilation = await this.EntityDocument.Project.GetCompilationAsync();
-            var doc = compilation.GetDocumentForSymbol(this.EntityDocument.Project.Solution, entityName);
-            return new EntityViewModel(doc);
+            var instance = new EntityViewModel();
+
+            instance.Properties = new ObservableCollection<PropertyViewModel>();
+
+            instance._originalMetadata = EntityParser.FromDocument(doc);
+            instance.EntityName = instance._originalMetadata.Name;
+
+            foreach (var p in instance._originalMetadata.Properties)
+            {
+                var propViewModel = new PropertyViewModel(instance);
+                propViewModel.Name = p.Name;
+                propViewModel.Type = p.Type;
+                propViewModel.CanSelect = true;
+
+                if (p.IsCollection && !canSelectCollections)
+                    propViewModel.CanSelect = false;
+
+                propViewModel.IsSelected = autoSelect && p.IsSimpleProperty;
+
+                if (p.IsRelation && !p.IsCollection && depth > 0)
+                {
+                    var relatedDoc = await doc.GetRelatedEntityDocument(p.RelatedEntityName);
+                    if(relatedDoc != null)
+                    {
+                        propViewModel.RelatedEntity = await CreateRecursive(relatedDoc, depth: depth - 1, autoSelect: false, canSelectCollections: false);
+                    }
+                    else
+                    {
+                        p.IsRelation = false;
+                        p.IsSimpleProperty = true;
+                    }
+                }
+
+                instance.Properties.Add(propViewModel);
+            }
+
+            return instance;
+        }
+
+        private EntityViewModel()
+        {
+
         }
 
         public EntityMetadata ConvertToMetadata()
         {
-            var result = EntityParser.FromDocument(this.EntityDocument);
+            var result = this._originalMetadata.Clone();
 
             var selectedProperties = this.Properties
                 .Where(p => p.IsSelected)
@@ -134,9 +152,9 @@ namespace DtoGenerator.Logic.UI
                     var related = relatedPropertiesWithSelection
                         .Where(p => p.Name == x.Name)
                         .Select(p => p.RelatedEntity)
-                        .Single();
+                        .FirstOrDefault();
 
-                    x.RelationMetadata = related.ConvertToMetadata();
+                    x.RelationMetadata = related?.ConvertToMetadata();
                 }
             }
 
@@ -161,8 +179,6 @@ namespace DtoGenerator.Logic.UI
         public PropertyViewModel(EntityViewModel entityModel)
         {
             this._entityViewModel = entityModel;
-
-            this.ExpandPropertyCommand = new ExpandPropertyCommandImpl(this);
         }
 
         public string Type { get; set; }
@@ -189,23 +205,6 @@ namespace DtoGenerator.Logic.UI
                         foreach (var prop in this._relatedEntity.Properties)
                             prop.IsSelected = value;
                     }
-                }
-            }
-        }
-
-        private bool _canExpand;
-        public bool CanExpand
-        {
-            get
-            {
-                return this._canExpand;
-            }
-            set
-            {
-                if (value != this._canExpand)
-                {
-                    this._canExpand = value;
-                    this.InvokePropertyChanged(nameof(CanExpand));
                 }
             }
         }
@@ -241,38 +240,6 @@ namespace DtoGenerator.Logic.UI
                     this._relatedEntity = value;
                     this.InvokePropertyChanged(nameof(RelatedEntity));
                 }
-            }
-        }
-
-        public ICommand ExpandPropertyCommand { get; set; }
-
-        internal void LoadRelatedEntity()
-        {
-            this.RelatedEntity = this._entityViewModel.GetRelatedEntity(this.Type).Result;
-        }
-
-        public class ExpandPropertyCommandImpl : ICommand
-        {
-            private PropertyViewModel _viewModel;
-
-            public ExpandPropertyCommandImpl(PropertyViewModel viewModel)
-            {
-                this._viewModel = viewModel;
-            }
-
-            public event EventHandler CanExecuteChanged;
-
-            public bool CanExecute(object parameter)
-            {
-                return this._viewModel.CanExpand && this._viewModel.RelatedEntity == null;
-            }
-
-            public void Execute(object parameter)
-            {
-                this._viewModel.LoadRelatedEntity();
-
-                if (CanExecuteChanged != null)
-                    CanExecuteChanged.Invoke(this, EventArgs.Empty);
             }
         }
     }

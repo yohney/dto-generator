@@ -26,10 +26,7 @@
                     <StackPanel Orientation="Horizontal">
                         <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding CanSelect}" Focusable="True" />
                         <TextBlock Text="{Binding NameFormatted}" Focusable="False" />
-                        <Button Cursor="Hand" Foreground="AliceBlue" BorderThickness="0" 
-                                Content="[expand]" Visibility="{Binding CanExpand, Converter={StaticResource BoolToVis}}" Command="{Binding ExpandPropertyCommand}" />
                     </StackPanel>
-
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>

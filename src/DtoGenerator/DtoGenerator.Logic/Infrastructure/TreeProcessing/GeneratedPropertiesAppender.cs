@@ -50,9 +50,17 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         {
             if (node.FirstAncestorOrSelf<PropertyDeclarationSyntax>().Identifier.Text == "SelectorExpression")
             {
+                
                 var initializerExpressions = GenerateInitializerExpressions(_metadata, "", "p.").ToList();
                 var nodeTokenList = SyntaxFactory.NodeOrTokenList();
-                foreach(var exp in initializerExpressions)
+
+                foreach(var existingExp in node.Expressions)
+                {
+                    nodeTokenList = nodeTokenList.Add(existingExp);
+                    nodeTokenList = nodeTokenList.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).AppendNewLine());
+                }
+
+                foreach (var exp in initializerExpressions)
                 {
                     nodeTokenList = nodeTokenList.Add(exp);
                     nodeTokenList = nodeTokenList.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).AppendNewLine());
@@ -122,7 +130,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                     if (prop.IsCollection)
                     {
-                        type = prop.RelatedEntityName.ToCollectionType("ICollection");
+                        type = (prop.RelatedEntityName + "DTO").ToCollectionType("ICollection");
                     }
                     else
                     {

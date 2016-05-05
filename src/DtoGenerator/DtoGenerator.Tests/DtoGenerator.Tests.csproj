@@ -118,6 +118,7 @@
     <Compile Include="DtoBuilderTest.cs" />
     <Compile Include="EntityViewModelTest.cs" />
     <Compile Include="EntityParserTest.cs" />
+    <Compile Include="IntegrationTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -19,5 +19,15 @@ namespace DtoGenerator.Logic.Model
         public string Namespace { get; set; }
 
         public List<PropertyMetadata> Properties { get; set; }
+
+        internal EntityMetadata Clone()
+        {
+            return new EntityMetadata()
+            {
+                Name = this.Name,
+                Namespace = this.Namespace,
+                Properties = this.Properties.Select(p => p.Clone()).ToList()
+            };
+        }
     }
 }

@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using DtoGenerator.Logic.UI;
 using Microsoft.CodeAnalysis.MSBuild;
 
 namespace DtoGenerator.Standalone.WPF
@@ -45,7 +46,7 @@ namespace DtoGenerator.Standalone.WPF
                 .Where(p => p.Name == "Person.cs")
                 .FirstOrDefault();
 
-            var vm = new Logic.UI.OptionsViewModel(personClassDoc);
+            var vm = OptionsViewModel.Create(personClassDoc);
 
             this.container.DataContext = vm;
         }

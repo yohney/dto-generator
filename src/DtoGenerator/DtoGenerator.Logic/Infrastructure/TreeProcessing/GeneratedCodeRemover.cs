@@ -120,7 +120,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 .Select(p => p.WithoutTrivia().WithTrailingTrivia(SyntaxFactory.EndOfLine("\n")))
                 .ToList();
 
-            var res = node.WithInitializer(node.Initializer.WithExpressions(SyntaxFactory.SeparatedList(customExpressions)));
+            var res = node.WithInitializer(node.Initializer
+                .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken))
+                .WithExpressions(SyntaxFactory.SeparatedList(customExpressions)));
 
             this.FirstCustomSelector = res.Initializer.Expressions.FirstOrDefault();
             this.LastCustomSelector = res.Initializer.Expressions.LastOrDefault();

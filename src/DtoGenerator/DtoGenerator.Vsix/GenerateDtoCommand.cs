@@ -9,6 +9,7 @@ using System.ComponentModel.Design;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using DtoGenerator.Logic.Infrastructure;
 using DtoGenerator.Logic.UI;
 using DtoGenerator.Vsix.UI;
@@ -151,47 +152,46 @@ namespace DtoGenerator.Vsix
         /// <param name="e">Event args.</param>
         private async void MenuItemCallback(object sender, EventArgs e)
         {
-            var componentModel = (IComponentModel)Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SComponentModel));
-            var workspace = componentModel.GetService<VisualStudioWorkspace>();
-
-            var selectedItem = this.GetSelectedSolutionExplorerItem();
-            var doc = workspace.CurrentSolution
-                .GetDocumentIdsWithFilePath(selectedItem.Document.FullName)
-                .Select(p => workspace.CurrentSolution.GetDocument(p))
-                .FirstOrDefault();
-
-            var vm = new OptionsViewModel(doc);
-            var isConfirmed = new OptionsWindow { DataContext = vm }.ShowModal();
-
-            if(isConfirmed == true)
+            try
             {
-                var project = doc.Project.Solution.Projects
-                    .Where(p => p.Name.Contains(vm.DtoLocation.Split('/').First()))
-                    .FirstOrDefault();
+                var componentModel = (IComponentModel)Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SComponentModel));
+                var workspace = componentModel.GetService<VisualStudioWorkspace>();
 
-                var metadata = vm.EntityModel.ConvertToMetadata();
-
-                var compilation = await project.GetCompilationAsync();
-                var existingDtoDocument = compilation.GetDocumentForSymbol(project.Solution, metadata.DtoName);
-
-                SyntaxTree existingSyntaxTree = null;
-                if (existingDtoDocument != null)
-                    existingSyntaxTree = await existingDtoDocument.GetSyntaxTreeAsync();
-
-                var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: vm.DtoLocation.Replace('/', '.'), existingDto: existingSyntaxTree);
-                var formatted = Formatter.Format(syntaxTree.GetRoot(), workspace);
-
-                if (existingDtoDocument == null)
+                var selectedItem = this.GetSelectedSolutionExplorerItem();
+                if (selectedItem == null || selectedItem.Document == null)
                 {
-                    var newDoc = project.AddDocument(doc.Name.Replace(".cs", "DTO.cs"), formatted, folders: vm.DtoLocation.Split('/').Skip(1));
-                    workspace.TryApplyChanges(newDoc.Project.Solution);
+                    VsShellUtilities.ShowMessageBox(this.package, "Shitty exception - cannot get current selected solution item :/// .", "Error",
+                        OLEMSGICON.OLEMSGICON_WARNING,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+
+                    return;
                 }
-                else
+
+                var doc = workspace.CurrentSolution.GetDocumentByFilePath(selectedItem.Document.FullName);
+
+                var vm = await OptionsViewModel.Create(doc);
+                var isConfirmed = new OptionsWindow { DataContext = vm }.ShowModal();
+
+                if (isConfirmed == true)
                 {
-                    var newDoc = existingDtoDocument.WithSyntaxRoot(syntaxTree.GetRoot());
-                    workspace.TryApplyChanges(newDoc.Project.Solution);
+                    var modifiedSolution = await doc.Project.Solution.WriteDto(vm.DtoLocation, vm.EntityModel.ConvertToMetadata());
+                    var ok = workspace.TryApplyChanges(modifiedSolution);
+
+                    if (!ok)
+                    {
+                        VsShellUtilities.ShowMessageBox(this.package, "Unable to generate DTO.", "Error", OLEMSGICON.OLEMSGICON_WARNING, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                VsShellUtilities.ShowMessageBox(this.package, ex.Message, "An exception has occurred",
+                        OLEMSGICON.OLEMSGICON_WARNING,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            }
+            
         }
     }
 }

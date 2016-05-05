@@ -18,7 +18,7 @@ namespace DtoGenerator.Logic.Infrastructure
 {
     public class DtoBuilder
     {
-        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null)
+        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null, string mapperNamespace = null)
         {
             CompilationUnitSyntax root = null;
 
@@ -51,6 +51,11 @@ namespace DtoGenerator.Logic.Infrastructure
                 }
             }
 
+            if(mapperNamespace != null)
+            {
+                root = root.WithUsings(root.Usings.Add(mapperNamespace.ToUsing()));
+            }
+
             var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity);
             root = generatedPropertiesAppender.Visit(root) as CompilationUnitSyntax;
 
@@ -65,6 +70,21 @@ namespace DtoGenerator.Logic.Infrastructure
             }
 
             return SyntaxFactory.SyntaxTree(root);
+        }
+
+        public static SyntaxNode BuildMapper(string mapperNamespace)
+        {
+            using (var stream = typeof(DtoBuilder).Assembly.GetManifestResourceStream($"DtoGenerator.Logic.Infrastructure.Template.MapperBase.cs"))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    var sourceCode = reader.ReadToEnd();
+                    sourceCode = sourceCode
+                        .Replace("#Namespace#", mapperNamespace);
+
+                    return CSharpSyntaxTree.ParseText(sourceCode).GetRoot();
+                }
+            }
         }
 
         private static SyntaxTree BuildOutline(string dtoNamespace, EntityMetadata entity)

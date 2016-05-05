@@ -16,15 +16,19 @@ namespace DtoGenerator.TestSolution.DAL.Dto
         public string Name { get; set; }
         public DateTime DateCreated { get; set; }
 
-        ////BCPS/ BEGIN CUSTOM PROPERTY SECTION 
+        ////BCC/ BEGIN CUSTOM CODE SECTION
 
         public string CustomProperty { get; set; }
 
-        ////ECPS/ END CUSTOM PROPERTY SECTION
+        ////ECC/ END CUSTOM CODE SECTION
     }
 
     public class CityMapper : MapperBase<City, CityDTO>
     {
+        ////BCC/ BEGIN CUSTOM CODE SECTION
+
+        ////ECC/ END CUSTOM CODE SECTION
+
         public override Expression<Func<City, CityDTO>> SelectorExpression
         {
             get
@@ -36,11 +40,11 @@ namespace DtoGenerator.TestSolution.DAL.Dto
                     DateCreated = p.DateCreated,
                     PostalCode = p.PostalCode,
 
-                    ////BCSS/ BEGIN CUSTOM SELECTOR SECTION 
+                    ////BCC/ BEGIN CUSTOM CODE SECTION
 
                     CustomProperty = p.Name + p.PostalCode,
 
-                    ////ECSS/ END CUSTOM SELECTOR SECTION
+                    ////ECC/ END CUSTOM CODE SECTION
                 };
             }
         }
@@ -52,11 +56,11 @@ namespace DtoGenerator.TestSolution.DAL.Dto
             model.Name = dto.Name;
             model.DateCreated = dto.DateCreated;
 
-            ////BCMS/ BEGIN CUSTOM MAP SECTION 
+            ////BCC/ BEGIN CUSTOM CODE SECTION
 
             model.Name += dto.CustomProperty;
 
-            ////ECMS/ END CUSTOM MAP SECTION
+            ////ECC/ END CUSTOM CODE SECTION
         }
     }
 }

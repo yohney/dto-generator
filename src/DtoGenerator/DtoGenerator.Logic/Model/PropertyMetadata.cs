@@ -20,5 +20,20 @@ namespace DtoGenerator.Logic.Model
         public bool IsCollection { get; set; }
 
         public EntityMetadata RelationMetadata { get; set; }
+
+        internal PropertyMetadata Clone()
+        {
+            return new PropertyMetadata()
+            {
+                Name = this.Name,
+                Type = this.Type,
+                IsSimpleProperty = this.IsSimpleProperty,
+                SyntaxNode = this.SyntaxNode,
+                RelatedEntityName = this.RelatedEntityName,
+                IsRelation = this.IsRelation,
+                IsCollection = this.IsCollection,
+                RelationMetadata = this.RelationMetadata?.Clone()
+            };
+        }
     }
 }
