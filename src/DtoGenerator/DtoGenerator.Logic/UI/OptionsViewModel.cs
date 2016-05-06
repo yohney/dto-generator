@@ -20,8 +20,21 @@ namespace DtoGenerator.Logic.UI
         {
             var instance = new OptionsViewModel();
 
-            instance.DtoLocation = doc.Project.Solution.GetMostLikelyDtoLocation();
             instance.EntityModel = await EntityViewModel.CreateRecursive(doc, depth: 3);
+
+            var dtoName = instance.EntityModel.EntityName + "DTO";
+
+            var existingDto = doc.Project.Solution.GetDocumentByName(dtoName);
+            if(existingDto != null)
+            {
+                instance.IsDtoLocationEditable = false;
+                instance.DtoLocation = existingDto.GetDocumentRelativeLocation();
+            }
+            else
+            {
+                instance.IsDtoLocationEditable = true;
+                instance.DtoLocation = doc.Project.Solution.GetMostLikelyDtoLocation();
+            }
 
             return instance;
         }
@@ -44,6 +57,23 @@ namespace DtoGenerator.Logic.UI
                 {
                     this._dtoLocation = value;
                     this.InvokePropertyChanged(nameof(DtoLocation));
+                }
+            }
+        }
+
+        private bool _isDtoLocationEditable;
+        public bool IsDtoLocationEditable
+        {
+            get
+            {
+                return this._isDtoLocationEditable;
+            }
+            set
+            {
+                if (value != this._isDtoLocationEditable)
+                {
+                    this._isDtoLocationEditable = value;
+                    this.InvokePropertyChanged(nameof(IsDtoLocationEditable));
                 }
             }
         }

@@ -18,9 +18,22 @@ namespace Microsoft.CodeAnalysis
             return solution.Projects
                 .SelectMany(p => p.Documents)
                 .Where(p => p.Name.ToLower().Contains("dto"))
-                .GroupBy(p => p.Project.Name + "/" + string.Join("/", p.Folders))
+                .GroupBy(p => p.GetDocumentRelativeLocation())
                 .OrderByDescending(p => p.Count())
                 .Select(p => p.Key)
+                .FirstOrDefault();
+        }
+
+        public static string GetDocumentRelativeLocation(this Document p)
+        {
+            return p.Project.Name + "/" + string.Join("/", p.Folders);
+        }
+
+        public static Document GetDocumentByName(this Solution solution, string name)
+        {
+            return solution.Projects
+                .SelectMany(p => p.Documents)
+                .Where(p => p.Name.ToLower().Replace(".cs", "") == name.ToLower())
                 .FirstOrDefault();
         }
 

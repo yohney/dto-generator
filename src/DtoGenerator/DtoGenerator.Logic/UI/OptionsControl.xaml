@@ -31,7 +31,7 @@
             </TreeView.ItemTemplate>
         </TreeView>
         <Label Content="Dto location" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0"/>
-        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="1" Text="{Binding DtoLocation}"/>
+        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="1" Text="{Binding DtoLocation}" IsEnabled="{Binding IsDtoLocationEditable}"/>
         <StackPanel Grid.Column="1" HorizontalAlignment="Right" Grid.Row="3" VerticalAlignment="Stretch" Orientation="Horizontal">
             <Button Width="100" Content="Cancel" Margin="5,0,5,5" Click="Cancel_Click" />
             <Button Width="100" Content="OK" Margin="5,0,5,5" Click="Ok_Click" />
