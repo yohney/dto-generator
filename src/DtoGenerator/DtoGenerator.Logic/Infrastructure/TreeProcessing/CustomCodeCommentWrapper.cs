@@ -33,7 +33,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 this._remover.FirstCustomMapperMember,
                 this._remover.LastCustomMapperMember);
 
-            return result ?? base.VisitFieldDeclaration(node);
+            return base.VisitFieldDeclaration(result);
         }
 
         public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax node)
@@ -48,7 +48,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 this._remover.FirstCustomProperty,
                 this._remover.LastCustomProperty);
 
-            return result ?? base.VisitPropertyDeclaration(node);
+            return base.VisitPropertyDeclaration(result);
         }
 
         public override SyntaxNode VisitExpressionStatement(ExpressionStatementSyntax node)
@@ -63,7 +63,30 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 this._remover.FirstCustomMapperStatement,
                 this._remover.LastCustomMapperStatement);
 
-            return result ?? base.VisitExpressionStatement(node);
+            return result;
+        }
+
+        public override SyntaxNode VisitInitializerExpression(InitializerExpressionSyntax node)
+        {
+            var originalList = node.ChildNodesAndTokens();
+            for (int i = 0; i < originalList.Count; i++)
+            {
+                if (!originalList[i].IsNode)
+                    continue;
+
+                if (AreNodesEqual(this._remover.LastCustomSelector, originalList[i].AsNode()))
+                {
+                    var oldToken = originalList[i + 1].AsToken();
+                    var newToken = oldToken.WithTrailingTrivia(oldToken.TrailingTrivia
+                        .Add(SyntaxExtenders.EndOfLineTrivia)
+                        .Add(SyntaxFactory.Comment(CustomCodeCommentEnd))
+                        .Add(SyntaxExtenders.EndOfLineTrivia));
+
+                    return base.VisitInitializerExpression(node.ReplaceToken(oldToken, newToken));
+                }
+            }
+
+            return base.VisitInitializerExpression(node);
         }
 
         public override SyntaxNode VisitAssignmentExpression(AssignmentExpressionSyntax node)
@@ -76,13 +99,16 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 CustomCodeCommentBegin,
                 CustomCodeCommentEnd,
                 this._remover.FirstCustomSelector,
-                this._remover.LastCustomSelector);
+                null);
 
-            return result ?? base.VisitAssignmentExpression(node);
+            return base.VisitAssignmentExpression(result);
         }
 
         private bool AreNodesEqual(SyntaxNode a, SyntaxNode b)
         {
+            if (a == null || b == null)
+                return false;
+
             if (a.Kind() != b.Kind())
                 return false;
 
@@ -92,54 +118,32 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             return true;
         }
 
-        private SyntaxNode WrapWithComment(SyntaxNode node, string leadingTriviaComment, string trailingTriviaComment, SyntaxNode firstOccurance, SyntaxNode lastOccurance)
+        private TNode WrapWithComment<TNode>(TNode node, string leadingTriviaComment, string trailingTriviaComment, SyntaxNode firstOccurance, SyntaxNode lastOccurance)
+            where TNode: SyntaxNode
         {
-            if (firstOccurance == null)
-                return null;
-
-            if (_remover.CustomPropertiesCount == 1)
+            if (AreNodesEqual(node, firstOccurance))
             {
-                if (AreNodesEqual(node, firstOccurance))
-                {
-                    var leadingTrivia = node.GetLeadingTrivia().AddRange(new[] {
-                        SyntaxExtenders.EndOfLineTrivia,
-                        SyntaxFactory.Comment(leadingTriviaComment),
-                        SyntaxExtenders.EndOfLineTrivia });
-                    var trailingTrivia = node.GetTrailingTrivia()
-                        .Add(SyntaxExtenders.EndOfLineTrivia)
-                        .Add(SyntaxFactory.Comment(trailingTriviaComment))
-                        .Add(SyntaxExtenders.EndOfLineTrivia);
+                var leadingTrivia = node.GetLeadingTrivia()
+                    .Add(SyntaxExtenders.EndOfLineTrivia)
+                    .Add(SyntaxFactory.Comment(leadingTriviaComment))
+                    .Add(SyntaxExtenders.EndOfLineTrivia);
 
-                    return node
-                        .WithLeadingTrivia(leadingTrivia)
-                        .WithTrailingTrivia(trailingTrivia);
-                }
-            }
-            else
-            {
-                if (AreNodesEqual(node, firstOccurance))
-                {
-                    var leadingTrivia = node.GetLeadingTrivia()
-                        .Add(SyntaxExtenders.EndOfLineTrivia)
-                        .Add(SyntaxFactory.Comment(leadingTriviaComment))
-                        .Add(SyntaxExtenders.EndOfLineTrivia);
-
-                    return node
-                        .WithLeadingTrivia(leadingTrivia);
-                }
-                else if (AreNodesEqual(node, lastOccurance))
-                {
-                    var trailingTrivia = node.GetTrailingTrivia()
-                        .Add(SyntaxExtenders.EndOfLineTrivia)
-                        .Add(SyntaxFactory.Comment(trailingTriviaComment))
-                        .Add(SyntaxExtenders.EndOfLineTrivia);
-
-                    return node
-                        .WithTrailingTrivia(trailingTrivia);
-                }
+                node = node
+                    .WithLeadingTrivia(leadingTrivia);
             }
 
-            return null;
+            if (AreNodesEqual(node, lastOccurance))
+            {
+                var trailingTrivia = node.GetTrailingTrivia()
+                    .Add(SyntaxExtenders.EndOfLineTrivia)
+                    .Add(SyntaxFactory.Comment(trailingTriviaComment))
+                    .Add(SyntaxExtenders.EndOfLineTrivia);
+
+                node = node
+                    .WithTrailingTrivia(trailingTrivia);
+            }
+
+            return node;
         }
     }
 }

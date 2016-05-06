@@ -52,14 +52,10 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             {
                 
                 var initializerExpressions = GenerateInitializerExpressions(_metadata, "", "p.").ToList();
-                var nodeTokenList = SyntaxFactory.NodeOrTokenList();
-
-                foreach(var existingExp in node.Expressions)
-                {
-                    nodeTokenList = nodeTokenList.Add(existingExp);
-                    nodeTokenList = nodeTokenList.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).AppendNewLine());
-                }
-
+                var nodeTokenList = SyntaxFactory.NodeOrTokenList(node.ChildNodesAndTokens())
+                    .RemoveAt(node.ChildNodesAndTokens().Count - 1)
+                    .RemoveAt(0);
+                
                 foreach (var exp in initializerExpressions)
                 {
                     nodeTokenList = nodeTokenList.Add(exp);

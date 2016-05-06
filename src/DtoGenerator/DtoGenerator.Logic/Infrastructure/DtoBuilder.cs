@@ -51,23 +51,13 @@ namespace DtoGenerator.Logic.Infrastructure
                 }
             }
 
-            if(mapperNamespace != null)
-            {
-                root = root.WithUsings(root.Usings.Add(mapperNamespace.ToUsing()));
-            }
+            root = root.AppendUsing(mapperNamespace, entity.Namespace);
 
             var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity);
             root = generatedPropertiesAppender.Visit(root) as CompilationUnitSyntax;
 
-            var usingDirective = root.DescendantNodes(p => !(p is ClassDeclarationSyntax))
-                .OfType<UsingDirectiveSyntax>()
-                .Where(p => p.Name.ToString() == entity.Namespace)
-                .FirstOrDefault();
-
-            if (usingDirective == null)
-            {
-                root = root.WithUsings(root.Usings.Add(entity.Namespace.ToUsing()));
-            }
+            var newLineRemover = new NewLineRemover();
+            root = newLineRemover.Visit(root) as CompilationUnitSyntax;
 
             return SyntaxFactory.SyntaxTree(root);
         }

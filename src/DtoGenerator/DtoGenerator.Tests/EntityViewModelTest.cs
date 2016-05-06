@@ -73,6 +73,8 @@ namespace DtoGenerator.Tests
 
             Assert.AreEqual(3, Regex.Matches(sourceCode, CustomCodeCommentWrapper.CustomCodeCommentBegin).Count);
             Assert.AreEqual(3, Regex.Matches(sourceCode, CustomCodeCommentWrapper.CustomCodeCommentEnd).Count);
+
+            Assert.IsTrue(sourceCode.Contains("CustomProperty = p.Name + p.PostalCode,"));
         }
 
         [TestMethod]

@@ -112,6 +112,7 @@
     <Compile Include="Infrastructure\SolutionParser.cs" />
     <Compile Include="Infrastructure\SyntaxExtenders.cs" />
     <EmbeddedResource Include="Infrastructure\Template\MapperBase.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\NewLineRemover.cs" />
     <Compile Include="UI\OptionsControl.xaml.cs">
       <DependentUpon>OptionsControl.xaml</DependentUpon>
     </Compile>

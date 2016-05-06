@@ -39,6 +39,26 @@ namespace DtoGenerator.Logic.Infrastructure
             return SyntaxFactory.QualifiedName(nameLeft, SyntaxFactory.IdentifierName(parts.Last()));
         }
 
+        public static CompilationUnitSyntax AppendUsing(this CompilationUnitSyntax node, params string[] usingDirectives)
+        {
+            var existingUsings = node.DescendantNodes(p => !(p is ClassDeclarationSyntax))
+                .OfType<UsingDirectiveSyntax>()
+                .Select(p => p.Name.ToString())
+                .ToList();
+
+            var usings = node.Usings;
+
+            foreach(var x in usingDirectives)
+            {
+                if (x == null || existingUsings.Contains(x))
+                    continue;
+
+                usings = usings.Add(x.ToUsing());
+            }
+
+            return node.WithUsings(usings);
+        }
+
         public static UsingDirectiveSyntax ToUsing(this string @namespace)
         {
             return @namespace.SyntaxNameFromFullName().ToUsing();

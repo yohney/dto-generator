@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using DtoGenerator.TestSolution.DAL.Infrastructure;
+using DtoGenerator.TestSolution.DAL.Dto.Infrastructure;
 using DtoGenerator.TestSolution.Model.Entity;
 
 namespace DtoGenerator.TestSolution.DAL.Dto

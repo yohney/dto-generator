@@ -117,12 +117,20 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         {
             var customExpressions = node.Initializer.Expressions
                 .Where(p => this._finder.IsNodeWithinCustomCode(p))
-                .Select(p => p.WithoutTrivia().WithTrailingTrivia(SyntaxFactory.EndOfLine("\n")))
+                .Select(p => p.WithoutTrivia())
                 .ToList();
+
+            var nodeTokenList = SyntaxFactory.NodeOrTokenList();
+
+            foreach (var existingExp in customExpressions)
+            {
+                nodeTokenList = nodeTokenList.Add(existingExp);
+                nodeTokenList = nodeTokenList.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).AppendNewLine());
+            }
 
             var res = node.WithInitializer(node.Initializer
                 .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken))
-                .WithExpressions(SyntaxFactory.SeparatedList(customExpressions)));
+                .WithExpressions(SyntaxFactory.SeparatedList<ExpressionSyntax>(nodeTokenList)));
 
             this.FirstCustomSelector = res.Initializer.Expressions.FirstOrDefault();
             this.LastCustomSelector = res.Initializer.Expressions.LastOrDefault();
