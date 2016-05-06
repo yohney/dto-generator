@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace #Namespace#
 {
-    public class #Entity#DTO
+    public class #Entity#DTO #Inheritance#
     {
 
     }
@@ -18,10 +18,10 @@ namespace #Namespace#
         {
             get
             {
-                return p => new #Entity#DTO()
+                return ((Expression<Func<#Entity#, #Entity#DTO>>)(p => new #Entity#DTO()
                 {
-
-                };
+                    
+                }));
             }
         }
 

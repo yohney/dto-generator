@@ -86,7 +86,8 @@ namespace DtoGenerator.Logic.Infrastructure
                     var sourceCode = reader.ReadToEnd();
                     sourceCode = sourceCode
                         .Replace("#Entity#", entity.Name)
-                        .Replace("#Namespace#", dtoNamespace);
+                        .Replace("#Namespace#", dtoNamespace)
+                        .Replace("#Inheritance#", ": " + entity.BaseClassDtoName);
 
                     return CSharpSyntaxTree.ParseText(sourceCode);
                 }

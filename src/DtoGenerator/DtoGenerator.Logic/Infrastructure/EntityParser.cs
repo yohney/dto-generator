@@ -57,6 +57,17 @@ namespace DtoGenerator.Logic.Infrastructure
             result.Name = classNode.Identifier.Text;
             result.Namespace = namespaceNode.Name.ToString();
 
+            if(classNode.BaseList != null && classNode.BaseList.Types.Count > 0)
+            {
+                var baseType = classNode.BaseList.Types.First().ToString();
+                var isInterface = baseType.Length > 2 && baseType.StartsWith("I") && char.IsUpper(baseType[1]);
+
+                if(!isInterface)
+                {
+                    result.BaseClassName = baseType;
+                }
+            }
+
             result.Properties = properties
                 .Select(p => new PropertyMetadata()
                 {

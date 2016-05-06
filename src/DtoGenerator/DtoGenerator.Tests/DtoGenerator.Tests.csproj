@@ -114,7 +114,9 @@
     <EmbeddedResource Include="CodeSamples\EntityOnlySimplePropertiesDto.cs" />
     <EmbeddedResource Include="CodeSamples\ComplexEntityDto.cs" />
     <EmbeddedResource Include="CodeSamples\OtherEntity.cs" />
+    <EmbeddedResource Include="CodeSamples\EntityWithBase.cs" />
     <Compile Include="CodeSamples\SampleCodeProvider.cs" />
+    <Compile Include="MapperBaseTest.cs" />
     <Compile Include="DtoBuilderTest.cs" />
     <Compile Include="EntityViewModelTest.cs" />
     <Compile Include="EntityParserTest.cs" />
@@ -129,6 +131,10 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DtoGenerator.Logic.Generated.Verification\DtoGenerator.Logic.Generated.Verification.csproj">
+      <Project>{b141ab10-757b-4345-a343-ceda1546b9fb}</Project>
+      <Name>DtoGenerator.Logic.Generated.Verification</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DtoGenerator.Logic\DtoGenerator.Logic.csproj">
       <Project>{a98bff1f-cdcf-4a7c-a665-cd0114dfb9a5}</Project>
       <Name>DtoGenerator.Logic</Name>

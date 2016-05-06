@@ -13,6 +13,9 @@ namespace DtoGenerator.Logic.Model
             this.Properties = new List<PropertyMetadata>();
         }
 
+        public string BaseClassName { get; set; }
+        public string BaseClassDtoName => BaseClassName + "DTO";
+
         public string Name { get; set; }
         public string DtoName => Name + "DTO";
 
@@ -26,6 +29,7 @@ namespace DtoGenerator.Logic.Model
             {
                 Name = this.Name,
                 Namespace = this.Namespace,
+                BaseClassName = this.BaseClassName,
                 Properties = this.Properties.Select(p => p.Clone()).ToList()
             };
         }

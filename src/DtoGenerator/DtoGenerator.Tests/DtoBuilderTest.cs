@@ -86,5 +86,25 @@ namespace DtoGenerator.Tests
 
             var codeText = tree.ToString();
         }
+
+        [TestMethod]
+        public void DtoBuilder_EntityWithBase_BaseCallsGenerated()
+        {
+            var code = SampleCodeProvider.EntityWithBase;
+            var metadata = EntityParser.FromString(code);
+
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace");
+            Assert.IsNotNull(tree);
+
+            var codeText = tree.ToString();
+            Assert.IsTrue(codeText.Contains("private EntityBaseMapper _entityBaseMapper = new EntityBaseMapper();"));
+            Assert.IsTrue(codeText.Contains("})).MergeWith(this._entityBaseMapper.SelectorExpression);"));
+
+            Assert.IsTrue(codeText.Contains("public class EntityWithBaseDTO : EntityBaseDTO"));
+            Assert.IsFalse(codeText.Contains("EntityWithBaseDTO : EntityBaseDTO{"));
+            Assert.IsFalse(codeText.Contains("EntityWithBaseDTO : EntityBaseDTO {"));
+
+            Assert.IsTrue(codeText.Contains("this._entityBaseMapper.MapToModel(dto,model);"));
+        }
     }
 }

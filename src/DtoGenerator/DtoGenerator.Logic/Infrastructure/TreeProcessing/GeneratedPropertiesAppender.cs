@@ -27,7 +27,14 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 foreach (var prop in this.GenerateProperties(_metadata, ""))
                     membersList = membersList.Add(prop);
 
-                return node.WithMembers(membersList);
+                var result = node.WithMembers(membersList);
+
+                if(this._metadata.BaseClassName != null)
+                {
+                    result = result.WithBaseList(this._metadata.BaseClassDtoName.ToBaseClassList());
+                }
+
+                return result;
             }
 
             if (node.Identifier.Text.Contains("Mapper"))
@@ -40,17 +47,50 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     membersList = membersList.Insert(insertIndex++, newField);
                 }
 
+                if(this._metadata.BaseClassName != null)
+                {
+                    var newField = SyntaxExtenders.DeclareField(type: GenerateMapperTypeName(this._metadata.BaseClassName), autoCreateNew: true);
+                    membersList = membersList.Insert(insertIndex++, newField);
+                }
+
                 return base.VisitClassDeclaration(node.WithMembers(membersList));
             }
 
             return base.VisitClassDeclaration(node);
         }
 
+        public override SyntaxNode VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
+        {
+            var declaringProperty = node.FirstAncestorOrSelf<PropertyDeclarationSyntax>();
+            var parentInvocation = node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
+
+            if(declaringProperty != null && 
+                parentInvocation == null &&
+                declaringProperty.Identifier.ToString() == "SelectorExpression" && 
+                this._metadata.BaseClassName != null)
+            {
+                var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassName);
+                var methodMemberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, node, SyntaxFactory.IdentifierName("MergeWith"));
+                var invocationExpression = SyntaxFactory.InvocationExpression(methodMemberAccess)
+                    .WithArgumentList(SyntaxFactory.ArgumentList(
+                        SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                            new[] {
+                                SyntaxFactory.Argument($"this.{mapperField}.SelectorExpression".ToMemberAccess()) })));
+
+                return base.Visit(invocationExpression);
+            }
+            
+            return base.VisitParenthesizedExpression(node);
+        }
+
         public override SyntaxNode VisitInitializerExpression(InitializerExpressionSyntax node)
         {
-            if (node.FirstAncestorOrSelf<PropertyDeclarationSyntax>().Identifier.Text == "SelectorExpression")
+            var parentProperty = node.FirstAncestorOrSelf<PropertyDeclarationSyntax>();
+            var parentInvocation = node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
+
+            if (parentProperty != null && parentProperty.Identifier.Text == "SelectorExpression" || 
+                parentInvocation != null && parentInvocation.ToString().Contains("SelectorExpression"))
             {
-                
                 var initializerExpressions = GenerateInitializerExpressions(_metadata, "", "p.").ToList();
                 var nodeTokenList = SyntaxFactory.NodeOrTokenList(node.ChildNodesAndTokens())
                     .RemoveAt(node.ChildNodesAndTokens().Count - 1)
@@ -76,6 +116,13 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 foreach (var prop in _metadata.Properties.Where(p => !p.IsRelation))
                 {
                     var st = SyntaxExtenders.AssignmentStatement("model." + prop.Name, "dto." + prop.Name);
+                    statements = statements.Add(st);
+                }
+
+                if(this._metadata.BaseClassName != null)
+                {
+                    var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassName);
+                    var st = SyntaxExtenders.InvocationStatement($"this.{mapperField}.MapToModel", "dto", "model");
                     statements = statements.Add(st);
                 }
 

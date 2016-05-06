@@ -34,6 +34,27 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             this._finder = finder;
         }
 
+        public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax node)
+        {
+            var memberAccess = node.Expression as MemberAccessExpressionSyntax;
+            if(memberAccess != null && memberAccess.Name.ToString() == "MergeWith")
+            {
+                return base.Visit(memberAccess.Expression);
+            }
+
+            return base.VisitInvocationExpression(node);
+        }
+
+        public override SyntaxNode VisitBaseList(BaseListSyntax node)
+        {
+            if (node != null && !node.ToString().Contains("MapperBase"))
+            {
+                return null;
+            }
+
+            return base.VisitBaseList(node);
+        }
+
         public override SyntaxTrivia VisitTrivia(SyntaxTrivia trivia)
         {
             if (trivia.Kind() == SyntaxKind.SingleLineCommentTrivia)

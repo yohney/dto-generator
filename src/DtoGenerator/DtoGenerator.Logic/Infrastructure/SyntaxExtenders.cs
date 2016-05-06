@@ -79,6 +79,15 @@ namespace DtoGenerator.Logic.Infrastructure
             return node.WithTrailingTrivia(triviaList);
         }
 
+        public static BaseListSyntax ToBaseClassList(this string baseClass)
+        {
+            return SyntaxFactory.BaseList(
+                SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(
+                    SyntaxFactory.SimpleBaseType(
+                        SyntaxFactory.IdentifierName(baseClass).PrependWhitespace())))
+                .AppendNewLine();
+        }
+
         public static FieldDeclarationSyntax DeclareField(string type, bool autoCreateNew)
         {
             var fieldName = "_" + char.ToLower(type[0]) + type.Substring(1);
@@ -101,6 +110,11 @@ namespace DtoGenerator.Logic.Infrastructure
                                 SyntaxFactory.Token(SyntaxKind.PrivateKeyword)))
                             .NormalizeWhitespace(elasticTrivia: true)
                         .AppendNewLine();
+        }
+
+        public static ExpressionStatementSyntax InvocationStatement(string member, params string[] args)
+        {
+            return SyntaxFactory.ExpressionStatement(member.ToMethodInvocation(args.Select(p => p.ToMemberAccess()).ToArray()));
         }
 
         public static ExpressionStatementSyntax AssignmentStatement(string left, string right)

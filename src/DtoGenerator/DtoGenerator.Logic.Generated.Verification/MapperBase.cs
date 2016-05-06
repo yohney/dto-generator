@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace #Namespace#
+namespace DtoGenerator.Logic.Generated.Verification
 {
     public abstract class MapperBase<TEntity, TDto>
     {
