@@ -132,27 +132,32 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             return base.VisitBlock(node);
         }
 
-        private IEnumerable<ExpressionSyntax> GenerateInitializerExpressions(EntityMetadata metadata, string propPrefix, string selectorPrefix)
+        private IEnumerable<ExpressionSyntax> GenerateInitializerExpressions(EntityMetadata metadata, string propPrefix, string selectorPrefix, bool verifyNotNull = false)
         {
             foreach (var prop in metadata.Properties)
             {
                 if (prop.IsCollection)
                 {
-                    var methodName = (selectorPrefix + prop.Name + ".Select");
+                    var queryableMethod = (selectorPrefix + prop.Name + ".AsQueryable").ToMethodInvocation();
+
+                    var selectMethodMember = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
+                        queryableMethod,
+                        "Select".ToName());
+
                     var selectorProperty = ("this." + GenerateMapperFieldName(prop.RelatedEntityName) + ".SelectorExpression");
                     yield return SyntaxFactory.AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,
                             SyntaxFactory.IdentifierName(prop.Name).AppendWhitespace(),
-                            methodName.ToMethodInvocation(selectorProperty.ToMemberAccess()).PrependWhitespace());
+                            selectMethodMember.ToMethodInvocation(selectorProperty.ToMemberAccess()).PrependWhitespace());
                 }
                 else if (prop.IsRelation && prop.RelationMetadata != null)
                 {
-                    foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, propPrefix + prop.RelatedEntityName, selectorPrefix + prop.RelatedEntityName + "."))
+                    foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, propPrefix + prop.Name, selectorPrefix + prop.Name + ".", verifyNotNull: true))
                         yield return x;
                 }
                 else
                 {
-                    yield return SyntaxExtenders.AssignmentExpression(propPrefix + prop.Name, selectorPrefix + prop.Name);
+                    yield return SyntaxExtenders.AssignmentExpression(propPrefix + prop.Name, selectorPrefix + prop.Name, verifyRightNotNull: verifyNotNull);
                 }
             }
         }
@@ -163,7 +168,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             {
                 if (prop.IsRelation && !prop.IsCollection && prop.RelationMetadata != null)
                 {
-                    foreach (var x in GenerateProperties(prop.RelationMetadata, prefix + prop.RelatedEntityName))
+                    foreach (var x in GenerateProperties(prop.RelationMetadata, prefix + prop.Name))
                         yield return x;
                 }
                 else if(prop.IsCollection || prop.IsSimpleProperty)
@@ -173,7 +178,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                     if (prop.IsCollection)
                     {
-                        type = (prop.RelatedEntityName + "DTO").ToCollectionType("ICollection");
+                        type = (prop.RelatedEntityName + "DTO").ToCollectionType("IEnumerable");
                     }
                     else
                     {

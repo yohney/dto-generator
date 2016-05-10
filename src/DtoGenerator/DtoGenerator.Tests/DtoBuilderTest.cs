@@ -85,6 +85,17 @@ namespace DtoGenerator.Tests
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
+
+            Assert.IsTrue(codeText.Contains("public string OtherNumber { get; set; }"));
+            Assert.IsTrue(codeText.Contains("OtherNumber = p.Other != null ? p.Other.Number : null,"));
+
+            Assert.IsTrue(codeText.Contains("public IEnumerable<SomethingDTO> List1 { get; set; }"));
+            Assert.IsTrue(codeText.Contains("public IEnumerable<SomethingDTO> Enumerable2 { get; set; }"));
+            Assert.IsTrue(codeText.Contains("public IEnumerable<SomethingDTO> Collection2 { get; set; }"));
+
+            Assert.IsTrue(codeText.Contains("List1 = p.List1.AsQueryable().Select(this._somethingMapper.SelectorExpression),"));
+            Assert.IsTrue(codeText.Contains("Enumerable2 = p.Enumerable2.AsQueryable().Select(this._somethingMapper.SelectorExpression),"));
+            Assert.IsTrue(codeText.Contains("Collection2 = p.Collection2.AsQueryable().Select(this._somethingMapper.SelectorExpression),"));
         }
 
         [TestMethod]

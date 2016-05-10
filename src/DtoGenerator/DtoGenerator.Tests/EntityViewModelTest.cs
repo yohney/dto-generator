@@ -37,6 +37,7 @@ namespace DtoGenerator.Tests
 
             Assert.IsNotNull(relatedEntity);
             Assert.AreEqual("City", relatedEntity.EntityName);
+            Assert.IsTrue(relatedEntity.Properties.Any(p => p.Name == "UniqueId"));
 
             msWorkspace.Dispose();
         }

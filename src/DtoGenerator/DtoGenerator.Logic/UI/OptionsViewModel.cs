@@ -111,13 +111,13 @@ namespace DtoGenerator.Logic.UI
         public string EntityName { get; set; }
         public ObservableCollection<PropertyViewModel> Properties { get; set; }
 
-        public static async Task<EntityViewModel> CreateRecursive(Document doc, int depth = 3, bool autoSelect = true, bool canSelectCollections = true)
+        public static async Task<EntityViewModel> CreateRecursive(Document doc, int depth = 3, bool autoSelect = true, bool canSelectCollections = true, bool includeInherited = false)
         {
             var instance = new EntityViewModel();
 
             instance.Properties = new ObservableCollection<PropertyViewModel>();
 
-            instance._originalMetadata = EntityParser.FromDocument(doc);
+            instance._originalMetadata = await EntityParser.FromDocument(doc, includeInherited: includeInherited);
             instance.EntityName = instance._originalMetadata.Name;
 
             foreach (var p in instance._originalMetadata.Properties)
@@ -137,7 +137,7 @@ namespace DtoGenerator.Logic.UI
                     var relatedDoc = await doc.GetRelatedEntityDocument(p.RelatedEntityName);
                     if(relatedDoc != null)
                     {
-                        propViewModel.RelatedEntity = await CreateRecursive(relatedDoc, depth: depth - 1, autoSelect: false, canSelectCollections: false);
+                        propViewModel.RelatedEntity = await CreateRecursive(relatedDoc, depth: depth - 1, autoSelect: false, canSelectCollections: false, includeInherited: true);
                     }
                     else
                     {

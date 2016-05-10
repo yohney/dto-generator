@@ -43,7 +43,8 @@ namespace Existing.Filled.Dto
                 {
                     Name = p.Name,
                     Date = p.Date,
-                    OtherEntityName = p.OtherEntity.Name,
+                    OtherEntityName = p.OtherEntity != null && p.OtherEntity.Xyz != null && p.OtherEntity.Xyz.Cdf != null ? p.OtherEntity.Name : null,
+                    OtherEntityName = p.OtherEntity != null ? p.OtherEntity.Name : null,
                     Somethings1 = p.Somethings1.Select(this._something1Mapper.SelectorExpression),
                     Somethings2 = p.Somethings2.Select(this._something2Mapper.SelectorExpression),
                     Somethings3 = p.Somethings3.Select(this._something3Mapper.SelectorExpression),

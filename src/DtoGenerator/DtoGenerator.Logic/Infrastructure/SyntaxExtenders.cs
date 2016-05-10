@@ -126,12 +126,21 @@ namespace DtoGenerator.Logic.Infrastructure
 
         public static InvocationExpressionSyntax ToMethodInvocation(this string method, params ExpressionSyntax[] args)
         {
+            return method.ToMemberAccess().ToMethodInvocation(args);
+        }
+
+        public static InvocationExpressionSyntax ToMethodInvocation(this ExpressionSyntax methodMember, params ExpressionSyntax[] args)
+        {
             var argSyntaxes = args.Select(p => SyntaxFactory.Argument(p));
 
-            return SyntaxFactory.InvocationExpression(
-                            method.ToMemberAccess())
+            return SyntaxFactory.InvocationExpression(methodMember)
                         .WithArgumentList(
                             SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(argSyntaxes)));
+        }
+
+        public static SimpleNameSyntax ToName(this string identifier)
+        {
+            return SyntaxFactory.IdentifierName(identifier);
         }
 
         public static ExpressionSyntax ToMemberAccess(this string selector)
@@ -140,7 +149,7 @@ namespace DtoGenerator.Logic.Infrastructure
 
             if(parts.Count() == 1)
             {
-                return SyntaxFactory.IdentifierName(parts.First());
+                return parts.First().ToName();
             }
             else if (parts.Count() == 2)
             {
@@ -220,12 +229,46 @@ namespace DtoGenerator.Logic.Infrastructure
             return token.WithTrailingTrivia(token.TrailingTrivia.Add(EndOfLineTrivia));
         }
 
-        public static ExpressionSyntax AssignmentExpression(string left, string right)
+        public static ExpressionSyntax WrapInConditional(this ExpressionSyntax expression)
         {
+            var notNullExpressions = new List<BinaryExpressionSyntax>();
+
+            var memberAcc = expression as MemberAccessExpressionSyntax;
+            while(memberAcc != null && memberAcc.Expression is MemberAccessExpressionSyntax)
+            {
+                var notNullExp = SyntaxFactory.BinaryExpression(SyntaxKind.NotEqualsExpression,
+                    memberAcc.Expression,
+                    SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression));
+                notNullExpressions.Add(notNullExp);
+
+                memberAcc = memberAcc.Expression as MemberAccessExpressionSyntax;
+            }
+
+            notNullExpressions.Reverse();
+
+            if (notNullExpressions.Count == 0)
+                return expression;
+
+            ExpressionSyntax current = notNullExpressions.First();
+            for(int i = 1; i < notNullExpressions.Count; i++)
+            {
+                current = SyntaxFactory.BinaryExpression(SyntaxKind.LogicalAndExpression,
+                    current,
+                    notNullExpressions[i]);
+            }
+
+            return SyntaxFactory.ConditionalExpression(current, expression, SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)).NormalizeWhitespace();
+        }
+
+        public static ExpressionSyntax AssignmentExpression(string left, string right, bool verifyRightNotNull = false)
+        {
+            var rightMemberAccess = right.ToMemberAccess();
+            var rightExp = verifyRightNotNull ? rightMemberAccess.WrapInConditional() : rightMemberAccess;
+
             return SyntaxFactory.AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 left.ToMemberAccess().AppendWhitespace(),
-                right.ToMemberAccess().PrependWhitespace());
+                rightExp.PrependWhitespace());
         }
 
         public enum PropertyAccessorType

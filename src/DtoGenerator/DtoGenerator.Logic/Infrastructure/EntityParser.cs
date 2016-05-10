@@ -18,10 +18,23 @@ namespace DtoGenerator.Logic.Infrastructure
             return FromSyntaxTree(syntaxTree);
         }
 
-        public static EntityMetadata FromDocument(Document doc)
+        public static async Task<EntityMetadata> FromDocument(Document doc, bool includeInherited = false)
         {
             var syntaxTree = doc.GetSyntaxTreeAsync().Result;
-            return FromSyntaxTree(syntaxTree);
+            var metadata = FromSyntaxTree(syntaxTree);
+
+            if(includeInherited)
+            {
+                var baseDoc = await doc.GetRelatedEntityDocument(metadata.BaseClassName);
+
+                if (baseDoc != null)
+                {
+                    var baseMetadata = await EntityParser.FromDocument(baseDoc, includeInherited: true);
+                    metadata.Properties.AddRange(baseMetadata.Properties);
+                }
+            }
+
+            return metadata;
         }
 
         private static EntityMetadata FromSyntaxTree(SyntaxTree syntaxTree)

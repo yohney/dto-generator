@@ -158,17 +158,60 @@ namespace DtoGenerator.Vsix
                 var workspace = componentModel.GetService<VisualStudioWorkspace>();
 
                 var selectedItem = this.GetSelectedSolutionExplorerItem();
-                if (selectedItem == null || selectedItem.Document == null)
+                Microsoft.CodeAnalysis.Document doc = null;
+
+                if(selectedItem != null && selectedItem.Name != null && !selectedItem.Name.EndsWith(".cs"))
                 {
-                    VsShellUtilities.ShowMessageBox(this.package, "Shitty exception - cannot get current selected solution item :/// .", "Error",
+                    VsShellUtilities.ShowMessageBox(this.package, "Generate DTO action can only be invoked on CSharp files.", "Error",
+                       OLEMSGICON.OLEMSGICON_WARNING,
+                       OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                       OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+
+                    return;
+                }
+
+                if (selectedItem?.Document != null)
+                {
+                    doc = workspace.CurrentSolution.GetDocumentByFilePath(selectedItem.Document.FullName);
+                }
+                else if (selectedItem != null)
+                {
+                    var file = selectedItem.Name;
+                    var projectName = selectedItem.ContainingProject.Name;
+
+                    var docs = workspace.CurrentSolution.Projects
+                        .Where(p => p.Name == projectName)
+                        .SelectMany(p => p.Documents)
+                        .Where(d => d.Name == file)
+                        .ToList();
+
+                    if(docs.Count == 0)
+                    {
+                        VsShellUtilities.ShowMessageBox(this.package, "Shitty exception - cannot get current selected solution item :/// . Try opening desired document, and then activating this command.", "Error",
+                            OLEMSGICON.OLEMSGICON_WARNING,
+                            OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    }
+
+                    if(docs.Count > 1)
+                    {
+                        VsShellUtilities.ShowMessageBox(this.package, "Multiple documents with same name exist - cannot get current selected solution item. Try opening desired document, and then activating this command.", "Error",
+                            OLEMSGICON.OLEMSGICON_WARNING,
+                            OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    }
+
+                    doc = docs.FirstOrDefault();
+                }
+                else
+                {
+                    VsShellUtilities.ShowMessageBox(this.package, "Shitty exception - cannot get current selected solution item :/// . Try opening desired document, and then activating this command.", "Error",
                         OLEMSGICON.OLEMSGICON_WARNING,
                         OLEMSGBUTTON.OLEMSGBUTTON_OK,
                         OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
 
                     return;
                 }
-
-                var doc = workspace.CurrentSolution.GetDocumentByFilePath(selectedItem.Document.FullName);
 
                 var vm = await OptionsViewModel.Create(doc);
                 var isConfirmed = new OptionsWindow { DataContext = vm }.ShowModal();
