@@ -19,7 +19,7 @@ namespace Microsoft.CodeAnalysis
             return solution.Projects
                 .SelectMany(p => p.Documents)
                 .Where(p => p.Name.ToLower().Contains("dto"))
-                .GroupBy(p => p.GetDocumentRelativeLocation())
+                .GroupBy(p => p.GetDocumentRelativeLocation(), new SolutionLocationComparer())
                 .OrderByDescending(p => p.Count())
                 .Select(p => p.Key)
                 .FirstOrDefault();
@@ -33,7 +33,7 @@ namespace Microsoft.CodeAnalysis
             return solution.Projects
                 .Where(p => p.Name == location.Project)
                 .SelectMany(p => p.Documents)
-                .Where(p => string.Join("/", p.Folders) == location.FolderStructure)
+                .Where(p => string.Join("/", p.Folders).ToLower().Trim('/') == location.FolderStructure.ToLower().Trim('/'))
                 .Where(p => p.Name.ToLower() == documentName.ToLower())
                 .FirstOrDefault();
         }

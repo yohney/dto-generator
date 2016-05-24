@@ -183,7 +183,39 @@ namespace DtoGenerator.Logic.UI
 
         public bool Equals(SolutionLocation other)
         {
+            if (other == null)
+                return false;
+
             return this.ToString() == other.ToString();
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as SolutionLocation);
+        }
+    }
+
+    public class SolutionLocationComparer : IEqualityComparer<SolutionLocation>
+    {
+        public bool Equals(SolutionLocation x, SolutionLocation y)
+        {
+            if (x == null || y == null)
+                return false;
+
+            return x.Equals(y);
+        }
+
+        public int GetHashCode(SolutionLocation obj)
+        {
+            if (obj == null)
+                return 0;
+
+            return obj.GetHashCode();
         }
     }
 }
