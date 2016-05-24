@@ -23,6 +23,14 @@ namespace DtoGenerator.Logic.UI
         public event EventHandler OnCancel;
         public event EventHandler OnConfirm;
 
+        private BasicOptionsViewModel ViewModel
+        {
+            get
+            {
+                return this.DataContext as BasicOptionsViewModel;
+            }
+        }
+
         public BasicOptionsControl()
         {
             InitializeComponent();
@@ -38,6 +46,11 @@ namespace DtoGenerator.Logic.UI
         {
             if (this.OnConfirm != null)
                 this.OnConfirm.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnPredefinedNameClick(object sender, MouseButtonEventArgs e)
+        {
+            this.ViewModel.DtoName = (sender as TextBlock).Text.ToString();
         }
     }
 }

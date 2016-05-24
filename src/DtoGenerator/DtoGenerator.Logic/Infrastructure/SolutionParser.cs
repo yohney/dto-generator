@@ -27,6 +27,9 @@ namespace Microsoft.CodeAnalysis
 
         public static Document GetDocumentByLocation(this Solution solution, SolutionLocation location, string documentName)
         {
+            if (!documentName.EndsWith(".cs"))
+                documentName += ".cs";
+
             return solution.Projects
                 .Where(p => p.Name == location.Project)
                 .SelectMany(p => p.Documents)

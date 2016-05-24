@@ -91,6 +91,7 @@ namespace DtoGenerator.Logic.Infrastructure
                     sourceCode = sourceCode
                         .Replace("#Entity#", entity.Name)
                         .Replace("#DTO#", entity.DtoName)
+                        .Replace("#DTOAdjusted#", entity.DtoName.Replace("DTO", ""))
                         .Replace("#Namespace#", dtoNamespace)
                         .Replace("#Inheritance#", baseClassDtoReplacement);
 

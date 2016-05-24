@@ -30,7 +30,7 @@ namespace DtoGenerator.Logic.UI
             instance.RecommendedNames.Add(instance.DtoName);
             instance.RecommendedNames.Add(entityName + "ListDTO");
             instance.RecommendedNames.Add(entityName + "EditDTO");
-            instance.RecommendedNames.Add(entityName + "SimpeDTO");
+            instance.RecommendedNames.Add(entityName + "SimpleDTO");
             instance.RecommendedNames.Add(entityName + "ExtendedDTO");
 
             return instance;

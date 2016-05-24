@@ -31,6 +31,9 @@ namespace DtoGenerator.Logic.Infrastructure
                 if (baseDoc != null)
                 {
                     var baseMetadata = await EntityParser.FromDocument(baseDoc, includeInherited: true);
+                    foreach (var prop in baseMetadata.Properties)
+                        prop.IsInherited = true;
+
                     metadata.Properties.AddRange(baseMetadata.Properties);
                 }
             }
@@ -95,6 +98,7 @@ namespace DtoGenerator.Logic.Infrastructure
                 if(!isInterface)
                 {
                     result.BaseClassName = baseType;
+                    result.BaseClassDtoName = baseType + "DTO";
                 }
             }
 

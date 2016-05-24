@@ -18,6 +18,7 @@ namespace DtoGenerator.Logic.Model
         public string RelatedEntityName { get; set; }
         public bool IsRelation { get; set; }
         public bool IsCollection { get; set; }
+        public bool IsInherited { get; set; }
 
         public EntityMetadata RelationMetadata { get; set; }
 

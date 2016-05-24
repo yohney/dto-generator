@@ -47,9 +47,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     membersList = membersList.Insert(insertIndex++, newField);
                 }
 
-                if(this._metadata.BaseClassName != null)
+                if(this._metadata.BaseClassDtoName != null)
                 {
-                    var newField = SyntaxExtenders.DeclareField(type: GenerateMapperTypeName(this._metadata.BaseClassName), autoCreateNew: true);
+                    var newField = SyntaxExtenders.DeclareField(type: GenerateMapperTypeName(this._metadata.BaseClassDtoName), autoCreateNew: true);
                     membersList = membersList.Insert(insertIndex++, newField);
                 }
 
@@ -67,7 +67,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             if(declaringProperty != null && 
                 parentInvocation == null &&
                 declaringProperty.Identifier.ToString() == "SelectorExpression" && 
-                this._metadata.BaseClassName != null)
+                !string.IsNullOrWhiteSpace(this._metadata.BaseClassDtoName))
             {
                 var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassDtoName);
                 var methodMemberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, node, SyntaxFactory.IdentifierName("MergeWith"));
@@ -119,7 +119,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     statements = statements.Add(st);
                 }
 
-                if(this._metadata.BaseClassDtoName != null)
+                if(!string.IsNullOrWhiteSpace(this._metadata.BaseClassDtoName))
                 {
                     var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassDtoName);
                     var st = SyntaxExtenders.InvocationStatement($"this.{mapperField}.MapToModel", "dto", "model");
@@ -191,6 +191,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         }
         private string GenerateMapperFieldName(string relatedEntityName)
         {
+            if (string.IsNullOrWhiteSpace(relatedEntityName))
+                return null;
+
             relatedEntityName = relatedEntityName.Replace("DTO", "");
 
             var mapperType = relatedEntityName + "Mapper";
@@ -199,6 +202,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
         private string GenerateMapperTypeName(string relatedEntityName)
         {
+            relatedEntityName = relatedEntityName.Replace("DTO", "");
+
             return relatedEntityName + "Mapper";
         }
 

@@ -11,18 +11,47 @@
     </UserControl.Resources>
     <Grid Background="White">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="90"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="5"/>
-            <RowDefinition Height="25"/>
-            <RowDefinition/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="1"/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
-        <Label Content="Dto location" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0"/>
-        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="1" Text="{Binding DtoLocation}" IsEnabled="{Binding IsDtoLocationEditable}"/>
-        <StackPanel Grid.Column="1" HorizontalAlignment="Right" Grid.Row="3" VerticalAlignment="Stretch" Orientation="Horizontal">
+        <DockPanel LastChildFill="True" Grid.Row="1">
+            <Label Content="Dto location" VerticalAlignment="Center" />
+            <ComboBox ItemsSource="{Binding PossibleProjects}" SelectedItem="{Binding DtoLocation.Project, Mode=TwoWay}" Text="Choose project" Margin="6" VerticalAlignment="Center" />
+            <TextBox Margin="4" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding DtoLocation.FolderStructure}" IsEnabled="True" Padding="2" />
+        </DockPanel >
+        <DockPanel LastChildFill="True" Grid.Row="2">
+            <Label Content="Folder1/Folder2/.../FolderLast" HorizontalContentAlignment="Right" FontSize="8" />
+        </DockPanel >
+        <DockPanel LastChildFill="True" Grid.Row="3">
+            <Label Content="Dto name" VerticalAlignment="Center" />
+            <TextBox Margin="4" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding DtoName}"/>
+        </DockPanel >
+        <DockPanel LastChildFill="True" Grid.Row="4">
+            <Label Content="Or choose predefined" VerticalAlignment="Top" FontSize="9" />
+            <ListView ItemsSource="{Binding RecommendedNames}" BorderThickness="0" VerticalAlignment="Top"  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" MouseLeftButtonUp="OnPredefinedNameClick" FontSize="9" Foreground="LightGray" Cursor="Hand" TextDecorations="Underline" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </DockPanel >
+        
+        
+        <StackPanel HorizontalAlignment="Right" Grid.Row="6" VerticalAlignment="Stretch" Orientation="Horizontal">
             <Button Width="100" Content="Cancel" Margin="5,0,5,5" Click="Cancel_Click" />
             <Button Width="100" Content="OK" Margin="5,0,5,5" Click="Ok_Click" />
         </StackPanel>

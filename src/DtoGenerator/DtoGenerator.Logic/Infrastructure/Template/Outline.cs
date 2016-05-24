@@ -12,7 +12,7 @@ namespace #Namespace#
 
     }
 
-    public class #DTO#Mapper : MapperBase<#Entity#, #DTO#>
+    public class #DTOAdjusted#Mapper : MapperBase<#Entity#, #DTO#>
     {
         public override Expression<Func<#Entity#, #DTO#>> SelectorExpression
         {
