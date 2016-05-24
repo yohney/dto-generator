@@ -69,8 +69,11 @@
     <Compile Include="GenerateDtoCommand.cs" />
     <Compile Include="GenerateDtoCommandPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\OptionsWindow.xaml.cs">
-      <DependentUpon>OptionsWindow.xaml</DependentUpon>
+    <Compile Include="UI\BasicOptionsWindow.xaml.cs">
+      <DependentUpon>BasicOptionsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\PropertySelectorWindow.xaml.cs">
+      <DependentUpon>PropertySelectorWindow.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -280,7 +283,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="UI\OptionsWindow.xaml">
+    <Page Include="UI\BasicOptionsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\PropertySelectorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

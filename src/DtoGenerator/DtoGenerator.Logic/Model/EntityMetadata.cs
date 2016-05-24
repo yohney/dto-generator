@@ -14,10 +14,10 @@ namespace DtoGenerator.Logic.Model
         }
 
         public string BaseClassName { get; set; }
-        public string BaseClassDtoName => BaseClassName + "DTO";
+        public string BaseClassDtoName { get; set; }
 
         public string Name { get; set; }
-        public string DtoName => Name + "DTO";
+        public string DtoName { get; set; }
 
         public string Namespace { get; set; }
 

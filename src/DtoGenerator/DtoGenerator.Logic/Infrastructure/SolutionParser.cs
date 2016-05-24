@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DtoGenerator.Logic.Infrastructure;
 using DtoGenerator.Logic.Model;
+using DtoGenerator.Logic.UI;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
@@ -13,7 +14,7 @@ namespace Microsoft.CodeAnalysis
 {
     public static class SolutionParser
     {
-        public static string GetMostLikelyDtoLocation(this Solution solution)
+        public static SolutionLocation GetMostLikelyDtoLocation(this Solution solution)
         {
             return solution.Projects
                 .SelectMany(p => p.Documents)
@@ -24,9 +25,28 @@ namespace Microsoft.CodeAnalysis
                 .FirstOrDefault();
         }
 
-        public static string GetDocumentRelativeLocation(this Document p)
+        public static Document GetDocumentByLocation(this Solution solution, SolutionLocation location, string documentName)
         {
-            return p.Project.Name + "/" + string.Join("/", p.Folders);
+            return solution.Projects
+                .Where(p => p.Name == location.Project)
+                .SelectMany(p => p.Documents)
+                .Where(p => string.Join("/", p.Folders) == location.FolderStructure)
+                .Where(p => p.Name.ToLower() == documentName.ToLower())
+                .FirstOrDefault();
+        }
+
+        public static List<string> GetPossibleProjects(this Document doc)
+        {
+            return doc.Project.Solution.Projects.Select(p => p.Name).ToList();
+        }
+
+        public static SolutionLocation GetDocumentRelativeLocation(this Document p)
+        {
+            return new SolutionLocation()
+            {
+                Project = p.Project.Name,
+                FolderStructure = string.Join("/", p.Folders)
+            };
         }
 
         public static Document GetDocumentByName(this Solution solution, string name)
@@ -45,12 +65,10 @@ namespace Microsoft.CodeAnalysis
         /// <param name="dtoLocation"></param>
         /// <param name="metadata"></param>
         /// <returns>Modified solution containing changes to apply to workspace</returns>
-        public static async Task<Solution> WriteDto(this Solution solution, string dtoLocation, EntityMetadata metadata)
+        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityMetadata metadata)
         {
-            var projectName = dtoLocation.Split('/').First();
-
             var project = solution.Projects
-                    .Where(p => p.Name.Contains(projectName))
+                    .Where(p => p.Name.Contains(dtoLocation.Project))
                     .FirstOrDefault();
 
             var compilation = await project.GetCompilationAsync();
@@ -60,13 +78,13 @@ namespace Microsoft.CodeAnalysis
             if (existingDtoDocument != null)
                 existingSyntaxTree = await existingDtoDocument.GetSyntaxTreeAsync();
 
-            var dtoNamespace = dtoLocation.Replace('/', '.');
+            var dtoNamespace = dtoLocation.ToNamespace();
             var mapperNamespace = "unknown";
 
             var mapperDoc = compilation.GetDocumentForSymbol(project.Solution, "MapperBase");
             if(mapperDoc == null)
             {
-                var mapperFolderStructure = dtoLocation.Split('/').Skip(1).Concat(new[] { "Infrastructure" });
+                var mapperFolderStructure = dtoLocation.GetFolders().Concat(new[] { "Infrastructure" });
                 mapperNamespace = dtoNamespace + ".Infrastructure";
 
                 project = project.AddDocument("MapperBase.cs", DtoBuilder.BuildMapper(mapperNamespace), folders: mapperFolderStructure).Project;
@@ -85,7 +103,7 @@ namespace Microsoft.CodeAnalysis
             if (existingDtoDocument == null)
             {
                 var formatted = Formatter.Format(syntaxTree.GetRoot(), solution.Workspace);
-                var folderStructure = dtoLocation.Split('/').Skip(1);
+                var folderStructure = dtoLocation.GetFolders();
                 var newDoc = project.AddDocument(metadata.DtoName + ".cs", formatted, folders: folderStructure);
                 return newDoc.Project.Solution;
             }

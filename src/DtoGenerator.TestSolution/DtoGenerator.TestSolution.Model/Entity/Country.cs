@@ -7,12 +7,9 @@ using DtoGenerator.TestSolution.Model.Infrastructure;
 
 namespace DtoGenerator.TestSolution.Model.Entity
 {
-    public class City : EntityBase
+    public class Country : EntityBase
     {
-        public string PostalCode { get; set; }
-
         public string Name { get; set; }
-
-        public Country Country { get; set; }
+        public string Code { get; set; }
     }
 }

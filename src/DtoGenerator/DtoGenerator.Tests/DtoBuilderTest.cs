@@ -16,6 +16,7 @@ namespace DtoGenerator.Tests
         {
             var code = SampleCodeProvider.EntityOnlySimpleProperties;
             var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "EntityOnlySimplePropertiesDTO";
 
             var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Test.Namespace.Extra.Long");
             Assert.IsNotNull(tree);
@@ -39,6 +40,7 @@ namespace DtoGenerator.Tests
         {
             var code = SampleCodeProvider.EntityOnlySimpleProperties;
             var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "EntityOnlySimplePropertiesDTO";
 
             var existingDtoTree = CSharpSyntaxTree.ParseText(SampleCodeProvider.EntityOnlySimplePropertiesDto);
 
@@ -76,6 +78,7 @@ namespace DtoGenerator.Tests
         {
             var code = SampleCodeProvider.ComplexEntity;
             var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "ComplexEntityDTO";
             var otherEntityProp = metadata.Properties.Where(p => p.RelatedEntityName == "OtherEntity").Single();
             otherEntityProp.RelationMetadata = EntityParser.FromString(SampleCodeProvider.OtherEntity);
 
@@ -103,6 +106,9 @@ namespace DtoGenerator.Tests
         {
             var code = SampleCodeProvider.EntityWithBase;
             var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "EntityWithBaseDTO";
+            metadata.BaseClassDtoName = "EntityBaseDTO";
+            metadata.BaseClassName = "EntityBase";
 
             var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace");
             Assert.IsNotNull(tree);

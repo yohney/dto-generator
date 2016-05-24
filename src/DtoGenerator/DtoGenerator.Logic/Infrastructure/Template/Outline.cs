@@ -7,25 +7,25 @@ using System.Threading.Tasks;
 
 namespace #Namespace#
 {
-    public class #Entity#DTO #Inheritance#
+    public class #DTO# #Inheritance#
     {
 
     }
 
-    public class #Entity#Mapper : MapperBase<#Entity#, #Entity#DTO>
+    public class #DTO#Mapper : MapperBase<#Entity#, #DTO#>
     {
-        public override Expression<Func<#Entity#, #Entity#DTO>> SelectorExpression
+        public override Expression<Func<#Entity#, #DTO#>> SelectorExpression
         {
             get
             {
-                return ((Expression<Func<#Entity#, #Entity#DTO>>)(p => new #Entity#DTO()
+                return ((Expression<Func<#Entity#, #DTO#>>)(p => new #DTO#()
                 {
                     
                 }));
             }
         }
 
-        public override void MapToModel(#Entity#DTO dto, #Entity# model)
+        public override void MapToModel(#DTO# dto, #Entity# model)
         {
 
         }

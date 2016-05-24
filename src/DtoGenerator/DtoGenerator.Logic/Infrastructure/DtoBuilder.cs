@@ -83,11 +83,16 @@ namespace DtoGenerator.Logic.Infrastructure
             {
                 using (var reader = new StreamReader(stream))
                 {
+                    var baseClassDtoReplacement = ": " + entity.BaseClassDtoName;
+                    if (baseClassDtoReplacement == ": ")
+                        baseClassDtoReplacement = "";
+
                     var sourceCode = reader.ReadToEnd();
                     sourceCode = sourceCode
                         .Replace("#Entity#", entity.Name)
+                        .Replace("#DTO#", entity.DtoName)
                         .Replace("#Namespace#", dtoNamespace)
-                        .Replace("#Inheritance#", ": " + entity.BaseClassDtoName);
+                        .Replace("#Inheritance#", baseClassDtoReplacement);
 
                     return CSharpSyntaxTree.ParseText(sourceCode);
                 }

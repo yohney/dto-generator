@@ -212,9 +212,28 @@ namespace DtoGenerator.Vsix
 
                     return;
                 }
+                var possibleProjects = doc.GetPossibleProjects();
 
-                var vm = await OptionsViewModel.Create(doc);
-                var isConfirmed = new OptionsWindow { DataContext = vm }.ShowModal();
+                var vmBasic = BasicOptionsViewModel.Create(possibleProjects, doc.Name.Replace(".cs", ""), doc.Project.Solution.GetMostLikelyDtoLocation());
+                var shouldProceed = new BasicOptionsWindow { DataContext = vmBasic }.ShowModal();
+
+                if (shouldProceed != true)
+                    return;
+
+                var existingDoc = doc.Project.Solution.GetDocumentByLocation(vmBasic.DtoLocation, vmBasic.DtoName);
+                if(existingDoc != null)
+                {
+                    var result = VsShellUtilities.ShowMessageBox(this.package, "There is already a DTO class in the specified location. Press OK if you would like to regenerate it, or cancel to choose different name.", "Warninig - regenerate DTO?",
+                        OLEMSGICON.OLEMSGICON_WARNING,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OKCANCEL,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+
+                    if (result != 1)
+                        return;
+                }
+
+                var vm = await PropertySelectorViewModel.Create(doc, vmBasic.DtoName, vmBasic.DtoLocation, existingDto: existingDoc);
+                var isConfirmed = new PropertySelectorWindow() { DataContext = vm }.ShowModal();
 
                 if (isConfirmed == true)
                 {

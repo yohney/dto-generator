@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace DtoGenerator.Vsix.UI
 {
     /// <summary>
-    /// Interaction logic for OptionsWindow.xaml
+    /// Interaction logic for PropertySelectorWindow.xaml
     /// </summary>
-    public partial class OptionsWindow
+    public partial class BasicOptionsWindow
     {
-        public OptionsWindow()
+        public BasicOptionsWindow()
         {
             InitializeComponent();
         }

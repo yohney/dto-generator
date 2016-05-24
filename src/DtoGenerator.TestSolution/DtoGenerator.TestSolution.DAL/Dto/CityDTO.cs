@@ -14,6 +14,7 @@ namespace DtoGenerator.TestSolution.DAL.Dto
         public Guid UniqueId { get; set; }
         public string PostalCode { get; set; }
         public string Name { get; set; }
+        public string CountryCode { get; set; }
         public DateTime DateCreated { get; set; }
 
         ////BCC/ BEGIN CUSTOM CODE SECTION
@@ -39,6 +40,7 @@ namespace DtoGenerator.TestSolution.DAL.Dto
                     Name = p.Name,
                     DateCreated = p.DateCreated,
                     PostalCode = p.PostalCode,
+                    CountryCode = p.Country != null ? p.Country.Code : null,
 
                     ////BCC/ BEGIN CUSTOM CODE SECTION
 

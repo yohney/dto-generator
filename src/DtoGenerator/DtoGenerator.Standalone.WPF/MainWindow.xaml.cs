@@ -46,7 +46,7 @@ namespace DtoGenerator.Standalone.WPF
                 .Where(p => p.Name == "Person.cs")
                 .FirstOrDefault();
 
-            var vm = OptionsViewModel.Create(personClassDoc);
+            var vm = PropertySelectorViewModel.Create(personClassDoc, "PersonDTO", "TestSolution.DAL");
 
             this.container.DataContext = vm;
         }

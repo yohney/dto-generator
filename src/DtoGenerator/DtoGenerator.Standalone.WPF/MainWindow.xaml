@@ -9,7 +9,7 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
 
-        <UI:OptionsControl x:Name="container" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <UI:PropertySelectorControl x:Name="container" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
     </Grid>
 </Window>

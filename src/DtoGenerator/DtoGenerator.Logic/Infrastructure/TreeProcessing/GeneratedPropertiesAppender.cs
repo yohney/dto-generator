@@ -21,7 +21,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
         public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            if (node.Identifier.Text == this._metadata.Name + "DTO")
+            if (node.Identifier.Text == this._metadata.DtoName)
             {
                 var membersList = node.Members;
                 foreach (var prop in this.GenerateProperties(_metadata, ""))
@@ -29,7 +29,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                 var result = node.WithMembers(membersList);
 
-                if(this._metadata.BaseClassName != null)
+                if(this._metadata.BaseClassDtoName != null)
                 {
                     result = result.WithBaseList(this._metadata.BaseClassDtoName.ToBaseClassList());
                 }
@@ -69,7 +69,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 declaringProperty.Identifier.ToString() == "SelectorExpression" && 
                 this._metadata.BaseClassName != null)
             {
-                var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassName);
+                var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassDtoName);
                 var methodMemberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, node, SyntaxFactory.IdentifierName("MergeWith"));
                 var invocationExpression = SyntaxFactory.InvocationExpression(methodMemberAccess)
                     .WithArgumentList(SyntaxFactory.ArgumentList(
@@ -119,9 +119,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     statements = statements.Add(st);
                 }
 
-                if(this._metadata.BaseClassName != null)
+                if(this._metadata.BaseClassDtoName != null)
                 {
-                    var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassName);
+                    var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassDtoName);
                     var st = SyntaxExtenders.InvocationStatement($"this.{mapperField}.MapToModel", "dto", "model");
                     statements = statements.Add(st);
                 }
@@ -191,6 +191,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         }
         private string GenerateMapperFieldName(string relatedEntityName)
         {
+            relatedEntityName = relatedEntityName.Replace("DTO", "");
+
             var mapperType = relatedEntityName + "Mapper";
             return "_" + char.ToLower(mapperType[0]) + mapperType.Substring(1);
         }

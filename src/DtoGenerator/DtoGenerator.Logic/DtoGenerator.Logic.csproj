@@ -112,11 +112,16 @@
     <Compile Include="Infrastructure\SolutionParser.cs" />
     <Compile Include="Infrastructure\SyntaxExtenders.cs" />
     <EmbeddedResource Include="Infrastructure\Template\MapperBase.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\GeneratedPropertiesEnumerator.cs" />
     <Compile Include="Infrastructure\TreeProcessing\NewLineRemover.cs" />
-    <Compile Include="UI\OptionsControl.xaml.cs">
-      <DependentUpon>OptionsControl.xaml</DependentUpon>
+    <Compile Include="UI\BasicOptionsControl.xaml.cs">
+      <DependentUpon>BasicOptionsControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\OptionsViewModel.cs" />
+    <Compile Include="UI\PropertySelectorControl.xaml.cs">
+      <DependentUpon>PropertySelectorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\BasicOptionsViewModel.cs" />
+    <Compile Include="UI\PropertySelectorViewModel.cs" />
     <Compile Include="UI\ViewModelBase.cs" />
     <EmbeddedResource Include="Infrastructure\Template\Outline.cs" />
     <Compile Include="Infrastructure\TreeProcessing\CustomCodeCommentWrapper.cs" />
@@ -137,7 +142,11 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="UI\OptionsControl.xaml">
+    <Page Include="UI\BasicOptionsControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\PropertySelectorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

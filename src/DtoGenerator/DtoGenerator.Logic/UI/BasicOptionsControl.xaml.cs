@@ -16,14 +16,14 @@ using System.Windows.Shapes;
 namespace DtoGenerator.Logic.UI
 {
     /// <summary>
-    /// Interaction logic for OptionsControl.xaml
+    /// Interaction logic for PropertySelectorControl.xaml
     /// </summary>
-    public partial class OptionsControl : UserControl
+    public partial class BasicOptionsControl : UserControl
     {
         public event EventHandler OnCancel;
         public event EventHandler OnConfirm;
 
-        public OptionsControl()
+        public BasicOptionsControl()
         {
             InitializeComponent();
         }
