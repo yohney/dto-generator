@@ -37,13 +37,14 @@ namespace DtoGenerator.Tests
             var code = SampleCodeProvider.EntityOnlySimpleProperties;
             var metadata = EntityParser.FromString(code);
 
-            Assert.AreEqual(4, metadata.Properties.Count);
+            Assert.AreEqual(5, metadata.Properties.Count);
 
             Assert.IsTrue(metadata.Properties.All(p => p.SyntaxNode != null));
 
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Id" && p.IsSimpleProperty && p.Type == "int"));
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Name" && p.IsSimpleProperty && p.Type == "string"));
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Date" && p.IsSimpleProperty && p.Type == "DateTime?"));
+            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Date2" && p.IsSimpleProperty && p.Type == "Nullable<System.DateTime>" && !p.IsCollection));
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "OtherString" && p.IsSimpleProperty && p.Type == "string"));
         }
 

@@ -24,7 +24,7 @@ namespace DtoGenerator.Logic.UI
             instance.PossibleProjects = possibleProjects;
 
             instance.DtoName = entityName + "DTO";
-            instance.DtoLocation = likelyDtoLocation;
+            instance.DtoLocation = likelyDtoLocation ?? new SolutionLocation();
 
             instance.RecommendedNames = new List<string>();
             instance.RecommendedNames.Add(instance.DtoName);

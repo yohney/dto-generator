@@ -137,7 +137,8 @@ namespace DtoGenerator.Logic.Infrastructure
 
         private static bool IsCollection(PropertyDeclarationSyntax p)
         {
-            if (p.Type is GenericNameSyntax)
+            var genericSyntax = p.Type as GenericNameSyntax;
+            if (genericSyntax != null && genericSyntax.Identifier.ToString() != "Nullable")
                 return true;
 
             return false;
@@ -151,12 +152,16 @@ namespace DtoGenerator.Logic.Infrastructure
                 return IsSimpleType(nullableType.ElementType);
             }
 
+            var nullableGenericType = propertyNode.Type as GenericNameSyntax;
+            if (nullableGenericType != null && nullableGenericType.Identifier.ToString() == "Nullable")
+                return IsSimpleType(nullableGenericType.TypeArgumentList.Arguments.First());
+
             return IsSimpleType(propertyNode.Type);
         }
 
         private static bool IsSimpleType(TypeSyntax type)
         {
-            if (type.ToString() == "DateTime")
+            if (type.ToString() == "DateTime" || type.ToString().EndsWith(".DateTime"))
                 return true;
 
             if (type is PredefinedTypeSyntax)

@@ -24,6 +24,8 @@ namespace DtoGenerator.Tests.CodeSamples
 
         public DateTime? Date { get; set; }
 
+        public Nullable<System.DateTime> Date2 { get; set; }
+
         public string OtherString { get; set; }
 
         // Getter property - should not be included.
