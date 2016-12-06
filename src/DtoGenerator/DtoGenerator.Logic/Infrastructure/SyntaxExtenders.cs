@@ -229,10 +229,10 @@ namespace DtoGenerator.Logic.Infrastructure
             return token.WithTrailingTrivia(token.TrailingTrivia.Add(EndOfLineTrivia));
         }
 
-        public static ExpressionSyntax WrapInConditional(this ExpressionSyntax expression)
+        public static ExpressionSyntax WrapInConditional(this ExpressionSyntax expression, string propType)
         {
             var notNullExpressions = new List<BinaryExpressionSyntax>();
-
+            
             var memberAcc = expression as MemberAccessExpressionSyntax;
             while(memberAcc != null && memberAcc.Expression is MemberAccessExpressionSyntax)
             {
@@ -257,13 +257,16 @@ namespace DtoGenerator.Logic.Infrastructure
                     notNullExpressions[i]);
             }
 
-            return SyntaxFactory.ConditionalExpression(current, expression, SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)).NormalizeWhitespace();
+            var fallbackExpression = propType == null ? (ExpressionSyntax)SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)
+               : SyntaxFactory.DefaultExpression(SyntaxFactory.ParseTypeName(propType));
+
+            return SyntaxFactory.ConditionalExpression(current, expression, fallbackExpression).NormalizeWhitespace();
         }
 
-        public static ExpressionSyntax AssignmentExpression(string left, string right, bool verifyRightNotNull = false)
+        public static ExpressionSyntax AssignmentExpression(string left, string right, string propType = null, bool verifyRightNotNull = false)
         {
             var rightMemberAccess = right.ToMemberAccess();
-            var rightExp = verifyRightNotNull ? rightMemberAccess.WrapInConditional() : rightMemberAccess;
+            var rightExp = verifyRightNotNull ? rightMemberAccess.WrapInConditional(propType) : rightMemberAccess;
 
             return SyntaxFactory.AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,

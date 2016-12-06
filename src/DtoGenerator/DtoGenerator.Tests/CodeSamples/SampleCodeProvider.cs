@@ -13,6 +13,7 @@ namespace DtoGenerator.Tests.CodeSamples
         public static string MultipleClasses => GetManifestText(nameof(MultipleClasses));
 
         public static string EntityWithBase => GetManifestText(nameof(EntityWithBase));
+        public static string EntityWithBaseDTO => GetManifestText(nameof(EntityWithBaseDTO));
 
         public static string ComplexEntity => GetManifestText(nameof(ComplexEntity));
         public static string OtherEntity => GetManifestText(nameof(OtherEntity));

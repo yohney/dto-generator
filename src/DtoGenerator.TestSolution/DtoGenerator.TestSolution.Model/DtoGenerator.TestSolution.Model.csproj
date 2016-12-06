@@ -45,6 +45,7 @@
     <Compile Include="Entity\City.cs" />
     <Compile Include="Entity\Person.cs" />
     <Compile Include="Entity\PersonContact.cs" />
+    <Compile Include="Entity\Role.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="Infrastructure\EntityBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -90,7 +90,7 @@ namespace DtoGenerator.Tests
             var codeText = tree.ToString();
 
             Assert.IsTrue(codeText.Contains("public string OtherNumber { get; set; }"));
-            Assert.IsTrue(codeText.Contains("OtherNumber = p.Other != null ? p.Other.Number : null,"));
+            Assert.IsTrue(codeText.Contains("OtherNumber = p.Other != null ? p.Other.Number : default (string),"));
 
             Assert.IsTrue(codeText.Contains("public IEnumerable<SomethingDTO> List1 { get; set; }"));
             Assert.IsTrue(codeText.Contains("public IEnumerable<SomethingDTO> Enumerable2 { get; set; }"));

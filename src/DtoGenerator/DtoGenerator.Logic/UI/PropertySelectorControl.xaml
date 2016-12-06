@@ -18,19 +18,10 @@
             <RowDefinition Height="25"/>
             <RowDefinition Height="31"/>
             <RowDefinition Height="31"/>
+            <RowDefinition Height="31"/>
             <RowDefinition Height="178*"/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
-        <TreeView HorizontalAlignment="Stretch"  Margin="5" Grid.Row="4" VerticalAlignment="Stretch" ItemsSource="{Binding EntityModel.Properties}" >
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding RelatedEntity.Properties}" DataType="{x:Type local:PropertyViewModel}">
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsEnabled}" Focusable="True" />
-                        <TextBlock Text="{Binding NameFormatted}" Focusable="False" Foreground="{Binding TextColor}" />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
         <DockPanel LastChildFill="True" Grid.Row="1">
             <Label Content="{Binding EntityModel.EntityName}"/>
             <Label Content=" -> "/>
@@ -45,8 +36,20 @@
             <Label Content="Base dto:" VerticalAlignment="Center" />
             <TextBox Margin="4" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding EntityModel.BaseEntityDtoName}" IsEnabled="{Binding EntityModel.ReuseBaseEntityMapper}"/>
         </DockPanel >
-
-        <StackPanel HorizontalAlignment="Right" Grid.Row="5" VerticalAlignment="Stretch" Orientation="Horizontal" Width="220">
+        <DockPanel LastChildFill="True" Grid.Row="4" >
+            <CheckBox Margin="5,0" IsChecked="{Binding GenerateMapper}" Content="Generate mapper class" VerticalAlignment="Center" />
+        </DockPanel >
+        <TreeView HorizontalAlignment="Stretch"  Margin="5" Grid.Row="5" VerticalAlignment="Stretch" ItemsSource="{Binding EntityModel.Properties}" >
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding RelatedEntity.Properties}" DataType="{x:Type local:PropertyViewModel}">
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsEnabled}" Focusable="True" />
+                        <TextBlock Text="{Binding NameFormatted}" Focusable="False" Foreground="{Binding TextColor}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+        <StackPanel HorizontalAlignment="Right" Grid.Row="6" VerticalAlignment="Stretch" Orientation="Horizontal" Width="220">
             <Button Width="100" Content="Cancel" Margin="5,0,5,5" Click="Cancel_Click" />
             <Button Width="100" Content="OK" Margin="5,0,5,5" Click="Ok_Click" />
         </StackPanel>

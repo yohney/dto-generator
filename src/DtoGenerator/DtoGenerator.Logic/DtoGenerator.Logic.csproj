@@ -112,6 +112,8 @@
     <Compile Include="Infrastructure\SolutionParser.cs" />
     <Compile Include="Infrastructure\SyntaxExtenders.cs" />
     <EmbeddedResource Include="Infrastructure\Template\MapperBase.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\BaseDtoClassLocator.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\MapperRemover.cs" />
     <Compile Include="Infrastructure\TreeProcessing\GeneratedPropertiesEnumerator.cs" />
     <Compile Include="Infrastructure\TreeProcessing\NewLineRemover.cs" />
     <Compile Include="UI\BasicOptionsControl.xaml.cs">

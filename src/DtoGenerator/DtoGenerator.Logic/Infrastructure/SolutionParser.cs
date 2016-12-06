@@ -68,7 +68,7 @@ namespace Microsoft.CodeAnalysis
         /// <param name="dtoLocation"></param>
         /// <param name="metadata"></param>
         /// <returns>Modified solution containing changes to apply to workspace</returns>
-        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityMetadata metadata)
+        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityMetadata metadata, bool generateMapper)
         {
             var project = solution.Projects
                     .Where(p => p.Name.Contains(dtoLocation.Project))
@@ -85,14 +85,14 @@ namespace Microsoft.CodeAnalysis
             var mapperNamespace = "unknown";
 
             var mapperDoc = compilation.GetDocumentForSymbol(project.Solution, "MapperBase");
-            if(mapperDoc == null)
+            if(mapperDoc == null && generateMapper)
             {
                 var mapperFolderStructure = dtoLocation.GetFolders().Concat(new[] { "Infrastructure" });
                 mapperNamespace = dtoNamespace + ".Infrastructure";
 
                 project = project.AddDocument("MapperBase.cs", DtoBuilder.BuildMapper(mapperNamespace), folders: mapperFolderStructure).Project;
             }
-            else
+            else if(generateMapper)
             {
                 var mapperSyntax = await mapperDoc.GetSyntaxRootAsync();
                 mapperNamespace = mapperSyntax.DescendantNodesAndSelf(p => !p.IsKind(CSharp.SyntaxKind.NamespaceDeclaration))
@@ -101,7 +101,7 @@ namespace Microsoft.CodeAnalysis
                     .FirstOrDefault();
             }
 
-            var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: dtoNamespace, existingDto: existingSyntaxTree, mapperNamespace: mapperNamespace);
+            var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: dtoNamespace, existingDto: existingSyntaxTree, mapperNamespace: mapperNamespace, generateMapper: generateMapper);
 
             if (existingDtoDocument == null)
             {

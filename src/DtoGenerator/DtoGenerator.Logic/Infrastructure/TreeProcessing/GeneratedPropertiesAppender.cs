@@ -157,7 +157,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 }
                 else
                 {
-                    yield return SyntaxExtenders.AssignmentExpression(propPrefix + prop.Name, selectorPrefix + prop.Name, verifyRightNotNull: verifyNotNull);
+                    yield return SyntaxExtenders.AssignmentExpression(propPrefix + prop.Name, selectorPrefix + prop.Name, prop.Type, verifyRightNotNull: verifyNotNull);
                 }
             }
         }

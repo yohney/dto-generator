@@ -18,7 +18,7 @@ namespace DtoGenerator.Logic.Infrastructure
 {
     public class DtoBuilder
     {
-        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null, string mapperNamespace = null)
+        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null, string mapperNamespace = null, bool generateMapper = true)
         {
             CompilationUnitSyntax root = null;
 
@@ -58,6 +58,12 @@ namespace DtoGenerator.Logic.Infrastructure
 
             var newLineRemover = new NewLineRemover();
             root = newLineRemover.Visit(root) as CompilationUnitSyntax;
+
+            if(!generateMapper)
+            {
+                var mapperRemover = new MapperRemover();
+                root = mapperRemover.Visit(root) as CompilationUnitSyntax;
+            }
 
             return SyntaxFactory.SyntaxTree(root);
         }
