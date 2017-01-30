@@ -58,7 +58,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false);
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -95,7 +95,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, false);
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -130,7 +130,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "PersonDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false);
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -182,7 +182,7 @@ namespace DtoGenerator.Tests
 
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false);
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -233,7 +233,7 @@ namespace DtoGenerator.Tests
             Assert.IsTrue(countryProp.RelatedEntity.Properties.Where(p => p.Name == "Code").Any(p => p.IsSelected));
             Assert.IsFalse(countryProp.RelatedEntity.Properties.Where(p => p.Name == "Name").Any(p => p.IsSelected));
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true, false);
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -266,7 +266,7 @@ namespace DtoGenerator.Tests
             var dtoLocation = solution.GetMostLikelyDtoLocation();
             var vm = await PropertySelectorViewModel.Create(personClassDoc, "PersonCustomDTO", dtoLocation);
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true, false);
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -308,6 +308,77 @@ namespace DtoGenerator.Tests
             var vm = await PropertySelectorViewModel.Create(roleDoc, "RoleDTO", dtoLocation, existingDto);
 
             Assert.IsTrue(vm.EntityModel.ReuseBaseEntityMapper);
+        }
+
+        [TestMethod]
+        public async Task WriteDto_ExistingSolution_DataContract()
+        {
+            var msWorkspace = MSBuildWorkspace.Create();
+            var solution = msWorkspace.OpenSolutionAsync(this.TestSolution.FullName).Result;
+            solution = solution.GetIsolatedSolution();
+
+            var personClassDoc = solution.Projects
+                .SelectMany(p => p.Documents)
+                .Where(p => p.Name == "City.cs")
+                .FirstOrDefault();
+
+            var vm = await EntityViewModel.CreateRecursive(personClassDoc);
+            vm.DtoName = "CityDTO";
+            var dtoLocation = solution.GetMostLikelyDtoLocation();
+
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, true);
+            Assert.IsNotNull(modifiedSolution);
+
+            var cityDto = modifiedSolution.GetChanges(solution)
+                .GetProjectChanges().Single()
+                .GetChangedDocuments()
+                .Select(p => modifiedSolution.GetProject(p.ProjectId).GetDocument(p))
+                .Where(p => p.Name == "CityDTO.cs")
+                .FirstOrDefault();
+
+            Assert.IsNotNull(cityDto);
+
+            var source = await cityDto.GetTextAsync();
+            var sourceCode = source.ToString();
+
+            Assert.IsTrue(sourceCode.Contains("[DataContract]"));
+            Assert.IsTrue(sourceCode.Contains("[DataMember]"));
+            Assert.IsTrue(sourceCode.Contains("using System.Runtime.Serialization;"));
+        }
+
+        [TestMethod]
+        public async Task WriteDto_ExistingSolution_NoDataContract()
+        {
+            var msWorkspace = MSBuildWorkspace.Create();
+            var solution = msWorkspace.OpenSolutionAsync(this.TestSolution.FullName).Result;
+            solution = solution.GetIsolatedSolution();
+
+            var personClassDoc = solution.Projects
+                .SelectMany(p => p.Documents)
+                .Where(p => p.Name == "City.cs")
+                .FirstOrDefault();
+
+            var vm = await EntityViewModel.CreateRecursive(personClassDoc);
+            vm.DtoName = "CityDTO";
+            var dtoLocation = solution.GetMostLikelyDtoLocation();
+
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, false);
+            Assert.IsNotNull(modifiedSolution);
+
+            var cityDto = modifiedSolution.GetChanges(solution)
+                .GetProjectChanges().Single()
+                .GetChangedDocuments()
+                .Select(p => modifiedSolution.GetProject(p.ProjectId).GetDocument(p))
+                .Where(p => p.Name == "CityDTO.cs")
+                .FirstOrDefault();
+
+            Assert.IsNotNull(cityDto);
+
+            var source = await cityDto.GetTextAsync();
+            var sourceCode = source.ToString();
+
+            Assert.IsFalse(sourceCode.Contains("[DataContract]"));
+            Assert.IsFalse(sourceCode.Contains("[DataMember]"));
         }
     }
 }

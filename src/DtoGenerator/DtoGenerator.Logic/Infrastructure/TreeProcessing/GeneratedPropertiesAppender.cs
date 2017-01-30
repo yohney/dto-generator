@@ -13,9 +13,11 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
     public class GeneratedPropertiesAppender : CSharpSyntaxRewriter
     {
         private EntityMetadata _metadata;
+        private bool _addDataContractAttrs;
 
-        public GeneratedPropertiesAppender(EntityMetadata metadata)
+        public GeneratedPropertiesAppender(EntityMetadata metadata, bool addDataContractAttrs)
         {
+            this._addDataContractAttrs = addDataContractAttrs;
             this._metadata = metadata;
         }
 
@@ -29,7 +31,10 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                 var result = node.WithMembers(membersList);
 
-                if(this._metadata.BaseClassDtoName != null)
+                if (this._addDataContractAttrs)
+                    result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataContract"));
+
+                if (this._metadata.BaseClassDtoName != null)
                 {
                     result = result.WithBaseList(this._metadata.BaseClassDtoName.ToBaseClassList());
                 }
@@ -47,7 +52,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     membersList = membersList.Insert(insertIndex++, newField);
                 }
 
-                if(this._metadata.BaseClassDtoName != null)
+                if (this._metadata.BaseClassDtoName != null)
                 {
                     var newField = SyntaxExtenders.DeclareField(type: GenerateMapperTypeName(this._metadata.BaseClassDtoName), autoCreateNew: true);
                     membersList = membersList.Insert(insertIndex++, newField);
@@ -64,9 +69,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             var declaringProperty = node.FirstAncestorOrSelf<PropertyDeclarationSyntax>();
             var parentInvocation = node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
 
-            if(declaringProperty != null && 
+            if (declaringProperty != null &&
                 parentInvocation == null &&
-                declaringProperty.Identifier.ToString() == "SelectorExpression" && 
+                declaringProperty.Identifier.ToString() == "SelectorExpression" &&
                 !string.IsNullOrWhiteSpace(this._metadata.BaseClassDtoName))
             {
                 var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassDtoName);
@@ -79,7 +84,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                 return base.Visit(invocationExpression);
             }
-            
+
             return base.VisitParenthesizedExpression(node);
         }
 
@@ -88,14 +93,14 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             var parentProperty = node.FirstAncestorOrSelf<PropertyDeclarationSyntax>();
             var parentInvocation = node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
 
-            if (parentProperty != null && parentProperty.Identifier.Text == "SelectorExpression" || 
+            if (parentProperty != null && parentProperty.Identifier.Text == "SelectorExpression" ||
                 parentInvocation != null && parentInvocation.ToString().Contains("SelectorExpression"))
             {
                 var initializerExpressions = GenerateInitializerExpressions(_metadata, "", "p.").ToList();
                 var nodeTokenList = SyntaxFactory.NodeOrTokenList(node.ChildNodesAndTokens())
                     .RemoveAt(node.ChildNodesAndTokens().Count - 1)
                     .RemoveAt(0);
-                
+
                 foreach (var exp in initializerExpressions)
                 {
                     nodeTokenList = nodeTokenList.Add(exp);
@@ -119,7 +124,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     statements = statements.Add(st);
                 }
 
-                if(!string.IsNullOrWhiteSpace(this._metadata.BaseClassDtoName))
+                if (!string.IsNullOrWhiteSpace(this._metadata.BaseClassDtoName))
                 {
                     var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassDtoName);
                     var st = SyntaxExtenders.InvocationStatement($"this.{mapperField}.MapToModel", "dto", "model");
@@ -171,7 +176,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     foreach (var x in GenerateProperties(prop.RelationMetadata, prefix + prop.Name))
                         yield return x;
                 }
-                else if(prop.IsCollection || prop.IsSimpleProperty)
+                else if (prop.IsCollection || prop.IsSimpleProperty)
                 {
                     TypeSyntax type = null;
                     var identifier = prefix + prop.Name;
@@ -185,7 +190,12 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                         type = SyntaxFactory.IdentifierName(prop.Type);
                     }
 
-                    yield return SyntaxExtenders.DeclareAutoProperty(type, identifier); 
+                    var result = SyntaxExtenders.DeclareAutoProperty(type, identifier);
+
+                    if (this._addDataContractAttrs)
+                        result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataMember"));
+
+                    yield return result;
                 }
             }
         }

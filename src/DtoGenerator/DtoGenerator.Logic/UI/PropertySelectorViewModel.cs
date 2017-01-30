@@ -29,6 +29,8 @@ namespace DtoGenerator.Logic.UI
             var isDerived = await EntityParser.HasBaseDto(existingDto, instance.EntityModel.BaseEntityDtoName);
             instance.EntityModel.ReuseBaseEntityMapper |= isDerived;
 
+            instance.AddDataContract = await EntityParser.HasDataContract(existingDto);
+
             return instance;
         }
 
@@ -50,6 +52,23 @@ namespace DtoGenerator.Logic.UI
                 {
                     this._generateMapper = value;
                     this.InvokePropertyChanged(nameof(GenerateMapper));
+                }
+            }
+        }
+
+        private bool _addDataContract;
+        public bool AddDataContract
+        {
+            get
+            {
+                return this._addDataContract;
+            }
+            set
+            {
+                if (value != this._addDataContract)
+                {
+                    this._addDataContract = value;
+                    this.InvokePropertyChanged(nameof(AddDataContract));
                 }
             }
         }

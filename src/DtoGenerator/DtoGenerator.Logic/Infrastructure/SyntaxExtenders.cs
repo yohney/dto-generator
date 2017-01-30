@@ -176,6 +176,12 @@ namespace DtoGenerator.Logic.Infrastructure
             }
         }
 
+        public static SyntaxList<AttributeListSyntax> CreateAttributes(params string[] attributes)
+        {
+            var attrsList = SyntaxFactory.SeparatedList<AttributeSyntax>(attributes.Select(p => SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(p))));
+            return SyntaxFactory.SingletonList(SyntaxFactory.AttributeList(attrsList));
+        }
+
         public static PropertyDeclarationSyntax DeclareAutoProperty(TypeSyntax type, string identifier)
         {
             return SyntaxFactory.PropertyDeclaration(
