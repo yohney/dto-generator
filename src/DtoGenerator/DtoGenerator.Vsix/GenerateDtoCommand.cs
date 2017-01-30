@@ -156,7 +156,7 @@ namespace DtoGenerator.Vsix
             {
                 var componentModel = (IComponentModel)Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SComponentModel));
                 var workspace = componentModel.GetService<VisualStudioWorkspace>();
-
+                
                 var selectedItem = this.GetSelectedSolutionExplorerItem();
                 Microsoft.CodeAnalysis.Document doc = null;
 
@@ -242,18 +242,45 @@ namespace DtoGenerator.Vsix
 
                     if (!ok)
                     {
-                        VsShellUtilities.ShowMessageBox(this.package, "Unable to generate DTO.", "Error", OLEMSGICON.OLEMSGICON_WARNING, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                        VsShellUtilities.ShowMessageBox(this.package, "Unable to generate DTO. Please try again (could not apply changes).", "Error", OLEMSGICON.OLEMSGICON_WARNING, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                     }
                 }
             }
             catch(Exception ex)
             {
-                VsShellUtilities.ShowMessageBox(this.package, ex.Message, "An exception has occurred",
+                try
+                {
+                    VsShellUtilities.ShowMessageBox(this.package, ex.Message, "An exception has occurred. Please c/p stack trace to project website (https://github.com/yohney/dto-generator), with brief description of the problem.",
                         OLEMSGICON.OLEMSGICON_WARNING,
                         OLEMSGBUTTON.OLEMSGBUTTON_OK,
                         OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+
+                    var tmpFile = Path.GetTempFileName();
+
+                    string stackTrace = "";
+
+                    Exception tmp = ex;
+                    while (tmp != null)
+                    {
+                        stackTrace += tmp.StackTrace;
+                        stackTrace += "\n----------------------------\n\n";
+                        tmp = ex.InnerException;
+                    }
+
+
+                    File.WriteAllText(tmpFile, stackTrace);
+
+                    VsShellUtilities.OpenBrowser("file:///" + tmpFile);
+
+                }
+                catch(Exception innerEx)
+                {
+                    VsShellUtilities.ShowMessageBox(this.package, innerEx.Message, "An exception has occurred. Unable to write stack trace to TEMP directory.",
+                        OLEMSGICON.OLEMSGICON_WARNING,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                }
             }
-            
         }
     }
 }

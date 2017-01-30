@@ -71,8 +71,8 @@ namespace Microsoft.CodeAnalysis
         public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityMetadata metadata, bool generateMapper, bool addContractAttrs)
         {
             var project = solution.Projects
-                    .Where(p => p.Name.Contains(dtoLocation.Project))
-                    .FirstOrDefault();
+                .Where(p => p.Name.Contains(dtoLocation.Project))
+                .FirstOrDefault();
 
             var compilation = await project.GetCompilationAsync();
             var existingDtoDocument = compilation.GetDocumentForSymbol(project.Solution, metadata.DtoName);
@@ -81,7 +81,7 @@ namespace Microsoft.CodeAnalysis
             if (existingDtoDocument != null)
                 existingSyntaxTree = await existingDtoDocument.GetSyntaxTreeAsync();
 
-            var dtoNamespace = dtoLocation.ToNamespace();
+            var dtoNamespace = dtoLocation.ToNamespace(project.AssemblyName);
             var mapperNamespace = "unknown";
 
             var mapperDoc = compilation.GetDocumentForSymbol(project.Solution, "MapperBase");

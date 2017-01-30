@@ -166,9 +166,9 @@ namespace DtoGenerator.Logic.UI
             }
         }
 
-        public string ToNamespace()
+        public string ToNamespace(string projectAssemblyName)
         {
-            return this.ToString().Replace("/", ".");
+            return $"{projectAssemblyName}.{string.Join(".", GetFolders())}";
         }
 
         public List<string> GetFolders()
