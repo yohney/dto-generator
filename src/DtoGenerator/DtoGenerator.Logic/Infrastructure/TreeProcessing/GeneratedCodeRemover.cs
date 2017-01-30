@@ -136,27 +136,32 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
         public override SyntaxNode VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
-            var customExpressions = node.Initializer.Expressions
+            if(node.FirstAncestorOrSelf<PropertyDeclarationSyntax>().Identifier.Text == "SelectorExpression")
+            {
+                var customExpressions = node.Initializer.Expressions
                 .Where(p => this._finder.IsNodeWithinCustomCode(p))
                 .Select(p => p.WithoutTrivia())
                 .ToList();
 
-            var nodeTokenList = SyntaxFactory.NodeOrTokenList();
+                var nodeTokenList = SyntaxFactory.NodeOrTokenList();
 
-            foreach (var existingExp in customExpressions)
-            {
-                nodeTokenList = nodeTokenList.Add(existingExp);
-                nodeTokenList = nodeTokenList.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).AppendNewLine());
+                foreach (var existingExp in customExpressions)
+                {
+                    nodeTokenList = nodeTokenList.Add(existingExp);
+                    nodeTokenList = nodeTokenList.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).AppendNewLine());
+                }
+
+                var res = node.WithInitializer(node.Initializer
+                    .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken))
+                    .WithExpressions(SyntaxFactory.SeparatedList<ExpressionSyntax>(nodeTokenList)));
+
+                this.FirstCustomSelector = res.Initializer.Expressions.FirstOrDefault();
+                this.LastCustomSelector = res.Initializer.Expressions.LastOrDefault();
+
+                return res;
             }
 
-            var res = node.WithInitializer(node.Initializer
-                .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken))
-                .WithExpressions(SyntaxFactory.SeparatedList<ExpressionSyntax>(nodeTokenList)));
-
-            this.FirstCustomSelector = res.Initializer.Expressions.FirstOrDefault();
-            this.LastCustomSelector = res.Initializer.Expressions.LastOrDefault();
-
-            return res;
+            return node;
         }
     }
 }

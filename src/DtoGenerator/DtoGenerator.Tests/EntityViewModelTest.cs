@@ -111,6 +111,7 @@ namespace DtoGenerator.Tests
             var sourceCode = source.ToString();
 
             Assert.IsFalse(sourceCode.Contains("Mapper"));
+            Assert.IsFalse(sourceCode.Contains("unknown"));
         }
 
         [TestMethod]

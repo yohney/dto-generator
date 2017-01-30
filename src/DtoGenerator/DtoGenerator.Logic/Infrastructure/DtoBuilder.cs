@@ -51,7 +51,8 @@ namespace DtoGenerator.Logic.Infrastructure
                 }
             }
 
-            root = root.AppendUsing(mapperNamespace, entity.Namespace);
+            if(generateMapper)
+                root = root.AppendUsing(mapperNamespace, entity.Namespace);
 
             var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity);
             root = generatedPropertiesAppender.Visit(root) as CompilationUnitSyntax;

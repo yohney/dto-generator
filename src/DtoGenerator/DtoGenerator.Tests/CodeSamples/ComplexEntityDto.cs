@@ -8,6 +8,23 @@ namespace Existing.Filled.Dto
 {
     public class ComplexEntityDTO
     {
+        ////BCC/ BEGIN CUSTOM CODE SECTION 
+
+        public int CustomProperty { get; set; }
+
+        public int SomeOtherCustomProperty
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(OtherString))
+                    return new int();
+
+                return new List<string>() { this.OtherString }.Count();
+            }
+        }
+
+        ////ECC/ END CUSTOM CODE SECTION
+
         public string Name { get; set; }
         public DateTime? Date { get; set; }
         public string OtherString { get; set; }
@@ -18,11 +35,7 @@ namespace Existing.Filled.Dto
         public IEnumerable<Something2> Somethings2 { get; set; }
         public IEnumerable<Something3> Somethings3 { get; set; }
 
-        ////BCC/ BEGIN CUSTOM CODE SECTION 
-
-        public int CustomProperty { get; set; }
-
-        ////ECC/ END CUSTOM CODE SECTION
+        
     }
 
     public class ComplexEntityMapper : MapperBase<ComplexEntity, ComplexEntityDTO>
