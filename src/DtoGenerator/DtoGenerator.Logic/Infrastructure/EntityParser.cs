@@ -144,11 +144,18 @@ namespace DtoGenerator.Logic.Infrastructure
 
         private static string GetRelatedEntity(PropertyDeclarationSyntax p)
         {
-            if (p.Type is GenericNameSyntax)
-                return (p.Type as GenericNameSyntax).TypeArgumentList.Arguments.OfType<IdentifierNameSyntax>().Select(i => i.Identifier.Text).Single();
+            try
+            {
+                if (p.Type is GenericNameSyntax)
+                    return (p.Type as GenericNameSyntax).TypeArgumentList.Arguments.OfType<IdentifierNameSyntax>().Select(i => i.Identifier.Text).Single();
 
-            if (p.Type is IdentifierNameSyntax)
-                return (p.Type as IdentifierNameSyntax).Identifier.Text;
+                if (p.Type is IdentifierNameSyntax)
+                    return (p.Type as IdentifierNameSyntax).Identifier.Text;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
 
             return null;
         }
