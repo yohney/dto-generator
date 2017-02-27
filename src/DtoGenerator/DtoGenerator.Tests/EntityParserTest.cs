@@ -70,9 +70,9 @@ namespace DtoGenerator.Tests
 
             Assert.AreEqual("DtoGenerator.Tests.CodeSamples", metadata.Namespace);
             Assert.AreEqual("ComplexEntity", metadata.Name);
-            Assert.AreEqual(7, metadata.Properties.Count);
+            Assert.AreEqual(11, metadata.Properties.Count);
 
-            Assert.AreEqual(3, metadata.Properties.Count(p => p.IsSimpleProperty));
+            Assert.AreEqual(7, metadata.Properties.Count(p => p.IsSimpleProperty));
             Assert.AreEqual(3, metadata.Properties.Count(p => p.IsCollection));
             Assert.AreEqual(1, metadata.Properties.Count(p => p.RelatedEntityName == "OtherEntity"));
 

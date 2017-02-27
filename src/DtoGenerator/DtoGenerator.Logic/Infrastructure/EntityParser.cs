@@ -13,6 +13,26 @@ namespace DtoGenerator.Logic.Infrastructure
 {
     public class EntityParser
     {
+        private static List<Type> _simpleTypes = new List<Type>()
+        {
+            typeof(DateTime),
+            typeof(TimeSpan),
+            typeof(Guid),
+            typeof(byte), typeof(System.Byte),
+            typeof(sbyte), typeof(System.SByte),
+            typeof(char), typeof(System.Char),
+            typeof(decimal), typeof(System.Decimal),
+            typeof(double), typeof(System.Double),
+            typeof(float), typeof(System.Single),
+            typeof(int), typeof(System.Int32),
+            typeof(uint), typeof(System.UInt32),
+            typeof(long), typeof(System.Int64),
+            typeof(ulong), typeof(System.UInt64),
+            typeof(short), typeof(System.Int16),
+            typeof(ushort), typeof(System.UInt16),
+            typeof(string), typeof(System.String)
+        };
+
         public static EntityMetadata FromString(string code)
         {
             var syntaxTree = CSharpSyntaxTree.ParseText(code);
@@ -191,7 +211,12 @@ namespace DtoGenerator.Logic.Infrastructure
 
         private static bool IsSimpleType(TypeSyntax type)
         {
-            if (type.ToString() == "DateTime" || type.ToString().EndsWith(".DateTime"))
+            var simpleTypeList = _simpleTypes
+                .Select(p => $"{p.Namespace}.{p.Name}")
+                .Concat(_simpleTypes.Select(p => p.Name))
+                .ToList();
+
+            if (simpleTypeList.Contains(type.ToString()))
                 return true;
 
             if (type is PredefinedTypeSyntax)

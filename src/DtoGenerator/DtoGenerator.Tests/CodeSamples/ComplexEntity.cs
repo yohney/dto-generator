@@ -12,6 +12,11 @@ namespace DtoGenerator.Tests.CodeSamples
         public DateTime? Date { get; set; }
         public string OtherString { get; set; }
 
+        public Nullable<System.Guid> NullableGuid { get; set; }
+        public Nullable<System.DateTime> NullableDateTime { get; set; }
+        public System.Guid NotNullableGuid { get; set; }
+        public System.DateTime SystemDateTime { get; set; }
+
         public OtherEntity Other { get; set; }
 
         public List<Something> List1 { get; set; }
