@@ -35,6 +35,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                 if (this._addDataContractAttrs)
                     result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataContract"));
+                else
+                    result = result.WithAttributeLists(new SyntaxList<AttributeListSyntax>());
 
                 if (this._metadata.BaseClassDtoName != null)
                 {
@@ -194,11 +196,17 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                     var result = SyntaxExtenders.DeclareAutoProperty(type, identifier);
 
+                    
+
                     if (this._addDataContractAttrs)
                         result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataMember"));
+                    else
+                        result = result.WithAttributeLists(new SyntaxList<AttributeListSyntax>());
 
                     if (this._addDataAnnotations)
-                        result = result.WithAttributeLists(prop.AttributesList);
+                        result = result.AddAttributeLists(prop.AttributesList.ToArray());
+
+
 
                     yield return result;
                 }

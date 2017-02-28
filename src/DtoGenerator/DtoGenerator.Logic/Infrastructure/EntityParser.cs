@@ -85,9 +85,7 @@ namespace DtoGenerator.Logic.Infrastructure
             var classNode = classNodes.First();
             var properties = GetProperties(classNode);
 
-            bool AttributNotDataContractFound = properties.Any(p => p.AttributeLists.Any(a => a.Attributes.ToString() != "DataMember"));
-
-            return AttributNotDataContractFound;
+            return properties.Any(p => p.AttributeLists.Any(a => a.Attributes.ToString() != "DataMember"));
         }
 
         public static async Task<bool> HasDataContract(Document existingDto)
