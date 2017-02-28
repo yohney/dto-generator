@@ -58,7 +58,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -95,7 +95,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, false, false);
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -130,7 +130,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "PersonDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -182,7 +182,7 @@ namespace DtoGenerator.Tests
 
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -233,7 +233,7 @@ namespace DtoGenerator.Tests
             Assert.IsTrue(countryProp.RelatedEntity.Properties.Where(p => p.Name == "Code").Any(p => p.IsSelected));
             Assert.IsFalse(countryProp.RelatedEntity.Properties.Where(p => p.Name == "Name").Any(p => p.IsSelected));
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true, false, false);
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -266,7 +266,7 @@ namespace DtoGenerator.Tests
             var dtoLocation = solution.GetMostLikelyDtoLocation();
             var vm = await PropertySelectorViewModel.Create(personClassDoc, "PersonCustomDTO", dtoLocation);
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true, false, false);
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -326,7 +326,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, true);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, true, false);
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -362,7 +362,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, false, false);
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis;
 
 namespace DtoGenerator.Logic.Model
 {
@@ -21,6 +22,7 @@ namespace DtoGenerator.Logic.Model
         public bool IsInherited { get; set; }
 
         public EntityMetadata RelationMetadata { get; set; }
+        public SyntaxList<AttributeListSyntax> AttributesList { get; set; }
 
         internal PropertyMetadata Clone()
         {
@@ -33,7 +35,8 @@ namespace DtoGenerator.Logic.Model
                 RelatedEntityName = this.RelatedEntityName,
                 IsRelation = this.IsRelation,
                 IsCollection = this.IsCollection,
-                RelationMetadata = this.RelationMetadata?.Clone()
+                RelationMetadata = this.RelationMetadata?.Clone(),
+                AttributesList = this.AttributesList
             };
         }
     }

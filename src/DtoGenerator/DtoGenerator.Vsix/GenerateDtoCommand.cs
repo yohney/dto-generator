@@ -237,7 +237,7 @@ namespace DtoGenerator.Vsix
 
                 if (isConfirmed == true)
                 {
-                    var modifiedSolution = await doc.Project.Solution.WriteDto(vm.DtoLocation, vm.EntityModel.ConvertToMetadata(), vm.GenerateMapper, vm.AddDataContract);
+                    var modifiedSolution = await doc.Project.Solution.WriteDto(vm.DtoLocation, vm.EntityModel.ConvertToMetadata(), vm.GenerateMapper, vm.AddDataContract, vm.AddDataAnnotations);
                     var ok = workspace.TryApplyChanges(modifiedSolution);
 
                     if (!ok)

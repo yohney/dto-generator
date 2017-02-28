@@ -14,10 +14,12 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
     {
         private EntityMetadata _metadata;
         private bool _addDataContractAttrs;
+        private bool _addDataAnnotations;
 
-        public GeneratedPropertiesAppender(EntityMetadata metadata, bool addDataContractAttrs)
+        public GeneratedPropertiesAppender(EntityMetadata metadata, bool addDataContractAttrs, bool addDataAnnotations)
         {
             this._addDataContractAttrs = addDataContractAttrs;
+            this._addDataAnnotations = addDataAnnotations;
             this._metadata = metadata;
         }
 
@@ -194,6 +196,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                     if (this._addDataContractAttrs)
                         result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataMember"));
+
+                    if (this._addDataAnnotations)
+                        result = result.WithAttributeLists(prop.AttributesList);
 
                     yield return result;
                 }

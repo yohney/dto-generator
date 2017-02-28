@@ -74,6 +74,16 @@ namespace DtoGenerator.Logic.Infrastructure
             return finder.BaseDtoName == baseDtoName;
         }
 
+        public static async Task<bool> HasDataAnnotations(Document existingDto)
+        {
+            if (existingDto == null)
+                return false;
+
+            var existingRoot = await existingDto.GetSyntaxRootAsync();
+
+            return existingRoot.ToString().Contains("[Required]");
+        }
+
         public static async Task<bool> HasDataContract(Document existingDto)
         {
             if (existingDto == null)
@@ -154,7 +164,8 @@ namespace DtoGenerator.Logic.Infrastructure
                     SyntaxNode = p,
                     IsCollection = IsCollection(p),
                     IsRelation = IsRelation(p),
-                    RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null
+                    RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null,
+                    AttributesList = p.AttributeLists
                 })
                 .ToList();
 
