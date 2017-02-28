@@ -123,5 +123,59 @@ namespace DtoGenerator.Tests
 
             Assert.IsTrue(codeText.Contains("this._entityBaseMapper.MapToModel(dto,model);"));
         }
+
+        [TestMethod]
+        public void DtoBuilder_EntityWithBase_DataAnnotations()
+        {
+            var code = SampleCodeProvider.SampleTable2;
+            var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "SampleTable2DTO";
+
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace",addDataAnnotations:true);
+            Assert.IsNotNull(tree);
+
+            var codeText = tree.ToString();
+            Assert.IsTrue(codeText.Contains("[Required]"));
+            Assert.IsTrue(codeText.Contains("[StringLength(10)]"));
+            Assert.IsTrue(codeText.Contains("using System.ComponentModel.DataAnnotations;"));
+        }
+
+        [TestMethod]
+        public void DtoBuilder_EntityWithBase_NoDataAnnotations()
+        {
+            var code = SampleCodeProvider.SampleTable2;
+            var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "SampleTable2DTO";
+
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", addDataAnnotations: false);
+            Assert.IsNotNull(tree);
+
+            var codeText = tree.ToString();
+            Assert.IsFalse(codeText.Contains("[Required]"));
+            Assert.IsFalse(codeText.Contains("[StringLength(10)]"));
+            Assert.IsFalse(codeText.Contains("using System.ComponentModel.DataAnnotations;"));
+            Assert.IsFalse(codeText.Contains("[DataContract]"));
+            Assert.IsFalse(codeText.Contains("[DataMember]"));
+            Assert.IsFalse(codeText.Contains("using System.Runtime.Serialization;"));
+        }
+
+        [TestMethod]
+        public void DtoBuilder_EntityWithBase_DataAnnotations_And_DataContract()
+        {
+            var code = SampleCodeProvider.SampleTable2;
+            var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "SampleTable2DTO";
+
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", addContractAttrs: true, addDataAnnotations: true);
+            Assert.IsNotNull(tree);
+
+            var codeText = tree.ToString();
+            Assert.IsTrue(codeText.Contains("[Required]"));
+            Assert.IsTrue(codeText.Contains("[StringLength(10)]"));
+            Assert.IsTrue(codeText.Contains("using System.ComponentModel.DataAnnotations;"));
+            Assert.IsTrue(codeText.Contains("[DataContract]"));
+            Assert.IsTrue(codeText.Contains("[DataMember]"));
+            Assert.IsTrue(codeText.Contains("using System.Runtime.Serialization;"));
+        }
     }
 }

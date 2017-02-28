@@ -24,6 +24,12 @@ namespace DtoGenerator.Tests.CodeSamples
         
         public static string EntityWithCollectionProperties => GetManifestText(nameof(EntityWithCollectionProperties));
 
+
+        public static string SampleTable1 => GetManifestText(nameof(SampleTable1));
+        public static string SampleTable2 => GetManifestText(nameof(SampleTable2));
+        public static string SampleTable3 => GetManifestText(nameof(SampleTable3));
+
+
         private static string GetManifestText(string name)
         {
             using (var stream = typeof(SampleCodeProvider).Assembly.GetManifestResourceStream($"DtoGenerator.Tests.CodeSamples.{name}.cs"))
