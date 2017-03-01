@@ -39,8 +39,6 @@ namespace DtoGenerator.Tests
 
             Assert.AreEqual(5, metadata.Properties.Count);
 
-            Assert.IsTrue(metadata.Properties.All(p => p.SyntaxNode != null));
-
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Id" && p.IsSimpleProperty && p.Type == "int"));
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Name" && p.IsSimpleProperty && p.Type == "string"));
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Date" && p.IsSimpleProperty && p.Type == "DateTime?"));

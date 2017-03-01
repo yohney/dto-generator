@@ -151,7 +151,6 @@ namespace DtoGenerator.Logic.Infrastructure
                     Type = p.Type.ToString(),
                     Name = p.Identifier.Text,
                     IsSimpleProperty = IsSimpleProperty(p),
-                    SyntaxNode = p,
                     IsCollection = IsCollection(p),
                     IsRelation = IsRelation(p),
                     RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null
