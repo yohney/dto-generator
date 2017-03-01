@@ -24,6 +24,8 @@ namespace DtoGenerator.Tests.CodeSamples
         
         public static string EntityWithCollectionProperties => GetManifestText(nameof(EntityWithCollectionProperties));
 
+        public static string NestedEntity => GetManifestText(nameof(NestedEntity));
+
         private static string GetManifestText(string name)
         {
             using (var stream = typeof(SampleCodeProvider).Assembly.GetManifestResourceStream($"DtoGenerator.Tests.CodeSamples.{name}.cs"))

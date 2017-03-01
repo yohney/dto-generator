@@ -125,6 +125,7 @@ namespace DtoGenerator.Logic.Infrastructure
                 .DescendantNodes(p => !(p is PropertyDeclarationSyntax))
                 .OfType<PropertyDeclarationSyntax>()
                 .Where(p => p.Modifiers.Any(m => m.Kind() == SyntaxKind.PublicKeyword))
+                .Where(p => p.FirstAncestorOrSelf<ClassDeclarationSyntax>() == classNode)
                 .Where(p => p.AccessorList != null)
                 .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.GetAccessorDeclaration))
                 .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.SetAccessorDeclaration));

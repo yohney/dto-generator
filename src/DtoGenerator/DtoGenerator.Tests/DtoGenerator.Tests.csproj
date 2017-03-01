@@ -116,6 +116,7 @@
     <EmbeddedResource Include="CodeSamples\OtherEntity.cs" />
     <EmbeddedResource Include="CodeSamples\EntityWithBase.cs" />
     <EmbeddedResource Include="CodeSamples\EntityWithBaseDTO.cs" />
+    <EmbeddedResource Include="CodeSamples\NestedEntity.cs" />
     <Compile Include="CodeSamples\SampleCodeProvider.cs" />
     <Compile Include="MapperBaseTest.cs" />
     <Compile Include="DtoBuilderTest.cs" />
