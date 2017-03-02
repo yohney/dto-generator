@@ -24,11 +24,11 @@ namespace DtoGenerator.Tests.CodeSamples
         
         public static string EntityWithCollectionProperties => GetManifestText(nameof(EntityWithCollectionProperties));
 
-
         public static string SampleTable1 => GetManifestText(nameof(SampleTable1));
         public static string SampleTable2 => GetManifestText(nameof(SampleTable2));
         public static string SampleTable3 => GetManifestText(nameof(SampleTable3));
 
+        public static string NestedEntity => GetManifestText(nameof(NestedEntity));
 
         private static string GetManifestText(string name)
         {

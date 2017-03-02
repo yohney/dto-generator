@@ -39,8 +39,6 @@ namespace DtoGenerator.Tests
 
             Assert.AreEqual(5, metadata.Properties.Count);
 
-            Assert.IsTrue(metadata.Properties.All(p => p.SyntaxNode != null));
-
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Id" && p.IsSimpleProperty && p.Type == "int"));
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Name" && p.IsSimpleProperty && p.Type == "string"));
             Assert.IsTrue(metadata.Properties.Any(p => p.Name == "Date" && p.IsSimpleProperty && p.Type == "DateTime?"));
@@ -78,6 +76,28 @@ namespace DtoGenerator.Tests
 
             var relatedEntity = metadata.Properties
                 .Where(p => p.RelatedEntityName == "OtherEntity")
+                .FirstOrDefault();
+
+            Assert.IsTrue(relatedEntity.IsRelation);
+            Assert.IsFalse(relatedEntity.IsCollection);
+            Assert.IsFalse(relatedEntity.IsSimpleProperty);
+        }
+
+        [TestMethod]
+        public void EntityParser_ParseEntity_NestedEntity()
+        {
+            var code = SampleCodeProvider.NestedEntity;
+            var metadata = EntityParser.FromString(code);
+
+            Assert.AreEqual("DtoGenerator.Tests.CodeSamples", metadata.Namespace);
+            Assert.AreEqual("NestedEntity", metadata.Name);
+            Assert.AreEqual(2, metadata.Properties.Count);
+
+            Assert.AreEqual(1, metadata.Properties.Count(p => p.IsSimpleProperty));
+            Assert.AreEqual(1, metadata.Properties.Count(p => p.RelatedEntityName == "Nested"));
+
+            var relatedEntity = metadata.Properties
+                .Where(p => p.RelatedEntityName == "Nested")
                 .FirstOrDefault();
 
             Assert.IsTrue(relatedEntity.IsRelation);

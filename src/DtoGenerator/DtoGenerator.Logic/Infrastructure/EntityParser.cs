@@ -179,7 +179,6 @@ namespace DtoGenerator.Logic.Infrastructure
                     Type = p.Type.ToString(),
                     Name = p.Identifier.Text,
                     IsSimpleProperty = IsSimpleProperty(p),
-                    SyntaxNode = p,
                     IsCollection = IsCollection(p),
                     IsRelation = IsRelation(p),
                     RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null,
@@ -204,6 +203,7 @@ namespace DtoGenerator.Logic.Infrastructure
                 .DescendantNodes(p => !(p is PropertyDeclarationSyntax))
                 .OfType<PropertyDeclarationSyntax>()
                 .Where(p => p.Modifiers.Any(m => m.Kind() == SyntaxKind.PublicKeyword))
+                .Where(p => p.FirstAncestorOrSelf<ClassDeclarationSyntax>() == classNode)
                 .Where(p => p.AccessorList != null)
                 .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.GetAccessorDeclaration))
                 .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.SetAccessorDeclaration));
