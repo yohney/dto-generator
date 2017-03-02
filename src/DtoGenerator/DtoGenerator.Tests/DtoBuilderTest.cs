@@ -127,9 +127,9 @@ namespace DtoGenerator.Tests
         [TestMethod]
         public void DtoBuilder_EntityWithBase_DataAnnotations()
         {
-            var code = SampleCodeProvider.SampleTable2;
+            var code = SampleCodeProvider.SampleTable1;
             var metadata = EntityParser.FromString(code);
-            metadata.DtoName = "SampleTable2DTO";
+            metadata.DtoName = "SampleTable1DTO";
 
             var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace",addDataAnnotations:true);
             Assert.IsNotNull(tree);
@@ -137,7 +137,9 @@ namespace DtoGenerator.Tests
             var codeText = tree.ToString();
             Assert.IsTrue(codeText.Contains("[Required]"));
             Assert.IsTrue(codeText.Contains("[StringLength(10)]"));
+            Assert.IsTrue(codeText.Contains("[DisplayFormat(DataFormatString = \"{0:dd/MM/yyyy}\", ApplyFormatInEditMode = true)]"));
             Assert.IsTrue(codeText.Contains("using System.ComponentModel.DataAnnotations;"));
+            Assert.IsFalse(codeText.Contains("SuppressMessage"));
         }
 
         [TestMethod]

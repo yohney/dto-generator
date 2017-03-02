@@ -22,7 +22,7 @@ namespace DtoGenerator.Logic.Model
         public bool IsInherited { get; set; }
 
         public EntityMetadata RelationMetadata { get; set; }
-        public SyntaxList<AttributeListSyntax> AttributesList { get; set; }
+        public List<AttributeListSyntax> AttributesList { get; set; }
 
         internal PropertyMetadata Clone()
         {

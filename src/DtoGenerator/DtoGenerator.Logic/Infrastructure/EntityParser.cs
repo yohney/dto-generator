@@ -32,6 +32,22 @@ namespace DtoGenerator.Logic.Infrastructure
             typeof(ushort), typeof(System.UInt16),
             typeof(string), typeof(System.String)
         };
+        private static List<string> _ClassDataAnnotationToPreserve = new List<string>()
+        {
+            "MetadataType"
+        };
+        private static List<string> _AttributDataAnnotationToPreserve = new List<string>()
+        {
+            "DisplayName",
+            "DisplayFormat",
+            "Required",
+            "StringLength",
+            "RegularExpression",
+            "Range",
+            "DataType",
+            "Validation"
+        };
+
 
         public static EntityMetadata FromString(string code)
         {
@@ -85,7 +101,7 @@ namespace DtoGenerator.Logic.Infrastructure
             var classNode = classNodes.First();
             var properties = GetProperties(classNode);
 
-            return properties.Any(p => p.AttributeLists.Any(a => a.Attributes.ToString() != "DataMember"));
+            return properties.Any(p => p.AttributeLists.Any(a => a.Attributes.Any(att => _AttributDataAnnotationToPreserve.Contains(att.Name.ToString()))));
         }
 
         public static async Task<bool> HasDataContract(Document existingDto)
@@ -161,7 +177,8 @@ namespace DtoGenerator.Logic.Infrastructure
                     IsCollection = IsCollection(p),
                     IsRelation = IsRelation(p),
                     RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null,
-                    AttributesList = p.AttributeLists
+                    AttributesList = p.AttributeLists.Where(a => a.Attributes.Any(att => _AttributDataAnnotationToPreserve.Contains(att.Name.ToString())))
+                        .Select(a => a.RemoveNodes(a.Attributes.Where(att => !_AttributDataAnnotationToPreserve.Contains(att.Name.ToString())).ToArray(), SyntaxRemoveOptions.KeepNoTrivia)).ToList()
                 })
                 .ToList();
 

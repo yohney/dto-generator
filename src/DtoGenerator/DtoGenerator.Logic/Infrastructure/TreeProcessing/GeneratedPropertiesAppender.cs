@@ -206,8 +206,6 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     if (this._addDataAnnotations)
                         result = result.AddAttributeLists(prop.AttributesList.ToArray());
 
-
-
                     yield return result;
                 }
             }
