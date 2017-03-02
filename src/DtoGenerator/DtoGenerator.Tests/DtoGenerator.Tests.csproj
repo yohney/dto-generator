@@ -121,6 +121,7 @@
     <EmbeddedResource Include="CodeSamples\SampleTable1.cs" />
     <EmbeddedResource Include="CodeSamples\SampleTable2.cs" />
     <EmbeddedResource Include="CodeSamples\SampleTable3.cs" />
+    <EmbeddedResource Include="CodeSamples\SampleTable3MD.cs" />
     <Compile Include="MapperBaseTest.cs" />
     <Compile Include="DtoBuilderTest.cs" />
     <Compile Include="EntityViewModelTest.cs" />

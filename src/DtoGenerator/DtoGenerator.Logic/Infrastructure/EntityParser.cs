@@ -96,7 +96,10 @@ namespace DtoGenerator.Logic.Infrastructure
                 return false;
 
             var existingRoot = await existingDto.GetSyntaxRootAsync();
-
+            if (existingRoot.ToString().Contains("[MetadataType"))
+            {
+                return true;
+            }
             var classNodes = GetClassNodes(existingRoot);
             var classNode = classNodes.First();
             var properties = GetProperties(classNode);
@@ -166,6 +169,9 @@ namespace DtoGenerator.Logic.Infrastructure
                     result.BaseClassDtoName = baseType + "DTO";
                 }
             }
+
+            result.AttributesList = classNode.AttributeLists.Where(a => a.Attributes.Any(att => _ClassDataAnnotationToPreserve.Contains(att.Name.ToString())))
+                        .Select(a => a.RemoveNodes(a.Attributes.Where(att => !_ClassDataAnnotationToPreserve.Contains(att.Name.ToString())).ToArray(), SyntaxRemoveOptions.KeepNoTrivia)).ToList();
 
             result.Properties = properties
                 .Select(p => new PropertyMetadata()

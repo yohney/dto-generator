@@ -13,24 +13,21 @@ namespace DtoGenerator.Tests.CodeSamples
     using System.ComponentModel.DataAnnotations;
     using System.Collections.Generic;
     
-    [MetadataType(typeof(SampleTable3MD))]
-    public partial class SampleTable3
+    public class SampleTable3MD
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public SampleTable3()
-        {
-            this.SampleTable1 = new HashSet<SampleTable1>();
-        }
-    
+        [Required]
         public int Id { get; set; }
-    
+
+        [StringLength(50)]
+        [Required]
         public string Title { get; set; }
-    
+
+        [StringLength(200)]
+        [Required]
         public string Description { get; set; }
-    
+
+        [Required]
         public short Value { get; set; }
-    
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<SampleTable1> SampleTable1 { get; set; }
+
     }
 }

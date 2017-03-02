@@ -29,8 +29,7 @@ namespace DtoGenerator.Tests.CodeSamples
         [Required]
         public string Title { get; set; }
     
-        [StringLength(200)]
-        [Required]
+        [StringLength(200),Required]
         public string Description { get; set; }
     
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]

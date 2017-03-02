@@ -38,6 +38,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 else
                     result = result.WithAttributeLists(new SyntaxList<AttributeListSyntax>());
 
+                if (this._addDataAnnotations && this._metadata.AttributesList!= null)
+                    result = result.AddAttributeLists(this._metadata.AttributesList.ToArray());
+
                 if (this._metadata.BaseClassDtoName != null)
                 {
                     result = result.WithBaseList(this._metadata.BaseClassDtoName.ToBaseClassList());
@@ -203,7 +206,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     else
                         result = result.WithAttributeLists(new SyntaxList<AttributeListSyntax>());
 
-                    if (this._addDataAnnotations)
+                    if (this._addDataAnnotations && prop.AttributesList != null)
                         result = result.AddAttributeLists(prop.AttributesList.ToArray());
 
                     yield return result;

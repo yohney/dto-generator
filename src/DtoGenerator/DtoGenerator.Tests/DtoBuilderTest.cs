@@ -137,9 +137,24 @@ namespace DtoGenerator.Tests
             var codeText = tree.ToString();
             Assert.IsTrue(codeText.Contains("[Required]"));
             Assert.IsTrue(codeText.Contains("[StringLength(10)]"));
+            Assert.IsTrue(codeText.Contains("[StringLength(200),Required]"));
             Assert.IsTrue(codeText.Contains("[DisplayFormat(DataFormatString = \"{0:dd/MM/yyyy}\", ApplyFormatInEditMode = true)]"));
             Assert.IsTrue(codeText.Contains("using System.ComponentModel.DataAnnotations;"));
             Assert.IsFalse(codeText.Contains("SuppressMessage"));
+        }
+
+        [TestMethod]
+        public void DtoBuilder_EntityWithBase_DataAnnotations_MetadataType()
+        {
+            var code = SampleCodeProvider.SampleTable3;
+            var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "SampleTable3DTO";
+
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", addDataAnnotations: true);
+            Assert.IsNotNull(tree);
+
+            var codeText = tree.ToString();
+            Assert.IsTrue(codeText.Contains("[MetadataType(typeof(SampleTable3MD))]"));
         }
 
         [TestMethod]

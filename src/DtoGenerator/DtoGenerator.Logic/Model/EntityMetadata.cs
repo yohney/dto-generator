@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,7 @@ namespace DtoGenerator.Logic.Model
         public string Namespace { get; set; }
 
         public List<PropertyMetadata> Properties { get; set; }
+        public List<AttributeListSyntax> AttributesList { get; set; }
 
         internal EntityMetadata Clone()
         {
@@ -30,7 +32,8 @@ namespace DtoGenerator.Logic.Model
                 Name = this.Name,
                 Namespace = this.Namespace,
                 BaseClassName = this.BaseClassName,
-                Properties = this.Properties.Select(p => p.Clone()).ToList()
+                Properties = this.Properties.Select(p => p.Clone()).ToList(),
+                AttributesList = this.AttributesList
             };
         }
     }
