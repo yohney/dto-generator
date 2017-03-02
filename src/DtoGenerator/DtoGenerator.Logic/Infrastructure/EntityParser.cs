@@ -32,6 +32,22 @@ namespace DtoGenerator.Logic.Infrastructure
             typeof(ushort), typeof(System.UInt16),
             typeof(string), typeof(System.String)
         };
+        private static List<string> _ClassDataAnnotationToPreserve = new List<string>()
+        {
+            "MetadataType"
+        };
+        private static List<string> _AttributDataAnnotationToPreserve = new List<string>()
+        {
+            "DisplayName",
+            "DisplayFormat",
+            "Required",
+            "StringLength",
+            "RegularExpression",
+            "Range",
+            "DataType",
+            "Validation"
+        };
+
 
         public static EntityMetadata FromString(string code)
         {
@@ -74,6 +90,23 @@ namespace DtoGenerator.Logic.Infrastructure
             return finder.BaseDtoName == baseDtoName;
         }
 
+        public static async Task<bool> HasDataAnnotations(Document existingDto)
+        {
+            if (existingDto == null)
+                return false;
+
+            var existingRoot = await existingDto.GetSyntaxRootAsync();
+            if (existingRoot.ToString().Contains("[MetadataType"))
+            {
+                return true;
+            }
+            var classNodes = GetClassNodes(existingRoot);
+            var classNode = classNodes.First();
+            var properties = GetProperties(classNode);
+
+            return properties.Any(p => p.AttributeLists.Any(a => a.Attributes.Any(att => _AttributDataAnnotationToPreserve.Contains(att.Name.ToString()))));
+        }
+
         public static async Task<bool> HasDataContract(Document existingDto)
         {
             if (existingDto == null)
@@ -104,9 +137,7 @@ namespace DtoGenerator.Logic.Infrastructure
         {
             var root = syntaxTree.GetRoot();
 
-            var classNodes = root
-                .DescendantNodes(p => !(p is ClassDeclarationSyntax))
-                .OfType<ClassDeclarationSyntax>();
+            var classNodes = GetClassNodes(root);
 
             if (classNodes.Count() != 1)
             {
@@ -121,30 +152,26 @@ namespace DtoGenerator.Logic.Infrastructure
             var classNode = classNodes
                 .Single();
 
-            var properties = classNode
-                .DescendantNodes(p => !(p is PropertyDeclarationSyntax))
-                .OfType<PropertyDeclarationSyntax>()
-                .Where(p => p.Modifiers.Any(m => m.Kind() == SyntaxKind.PublicKeyword))
-                .Where(p => p.FirstAncestorOrSelf<ClassDeclarationSyntax>() == classNode)
-                .Where(p => p.AccessorList != null)
-                .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.GetAccessorDeclaration))
-                .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.SetAccessorDeclaration));
+            var properties = GetProperties(classNode);
 
             var result = new EntityMetadata();
             result.Name = classNode.Identifier.Text;
             result.Namespace = namespaceNode.Name.ToString();
 
-            if(classNode.BaseList != null && classNode.BaseList.Types.Count > 0)
+            if (classNode.BaseList != null && classNode.BaseList.Types.Count > 0)
             {
                 var baseType = classNode.BaseList.Types.First().ToString();
                 var isInterface = baseType.Length > 2 && baseType.StartsWith("I") && char.IsUpper(baseType[1]);
 
-                if(!isInterface)
+                if (!isInterface)
                 {
                     result.BaseClassName = baseType;
                     result.BaseClassDtoName = baseType + "DTO";
                 }
             }
+
+            result.AttributesList = classNode.AttributeLists.Where(a => a.Attributes.Any(att => _ClassDataAnnotationToPreserve.Contains(att.Name.ToString())))
+                        .Select(a => a.RemoveNodes(a.Attributes.Where(att => !_ClassDataAnnotationToPreserve.Contains(att.Name.ToString())).ToArray(), SyntaxRemoveOptions.KeepNoTrivia)).ToList();
 
             result.Properties = properties
                 .Select(p => new PropertyMetadata()
@@ -154,13 +181,33 @@ namespace DtoGenerator.Logic.Infrastructure
                     IsSimpleProperty = IsSimpleProperty(p),
                     IsCollection = IsCollection(p),
                     IsRelation = IsRelation(p),
-                    RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null
+                    RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null,
+                    AttributesList = p.AttributeLists.Where(a => a.Attributes.Any(att => _AttributDataAnnotationToPreserve.Contains(att.Name.ToString())))
+                        .Select(a => a.RemoveNodes(a.Attributes.Where(att => !_AttributDataAnnotationToPreserve.Contains(att.Name.ToString())).ToArray(), SyntaxRemoveOptions.KeepNoTrivia)).ToList()
                 })
                 .ToList();
 
             return result;
         }
-        
+
+        private static IEnumerable<ClassDeclarationSyntax> GetClassNodes(SyntaxNode root)
+        {
+            return root
+                .DescendantNodes(p => !(p is ClassDeclarationSyntax))
+                .OfType<ClassDeclarationSyntax>();
+        }
+
+        private static IEnumerable<PropertyDeclarationSyntax> GetProperties(ClassDeclarationSyntax classNode)
+        {
+            return classNode
+                .DescendantNodes(p => !(p is PropertyDeclarationSyntax))
+                .OfType<PropertyDeclarationSyntax>()
+                .Where(p => p.Modifiers.Any(m => m.Kind() == SyntaxKind.PublicKeyword))
+                .Where(p => p.FirstAncestorOrSelf<ClassDeclarationSyntax>() == classNode)
+                .Where(p => p.AccessorList != null)
+                .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.GetAccessorDeclaration))
+                .Where(p => p.AccessorList.Accessors.Any(a => a.Kind() == SyntaxKind.SetAccessorDeclaration));
+        }
 
         private static string GetRelatedEntity(PropertyDeclarationSyntax p)
         {

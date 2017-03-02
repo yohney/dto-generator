@@ -68,6 +68,7 @@
       <HintPath>..\packages\System.Collections.Immutable.1.1.37\lib\dotnet\System.Collections.Immutable.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Composition.AttributedModel, Version=1.0.27.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Composition.1.0.27\lib\portable-net45+win8+wp8+wpa81\System.Composition.AttributedModel.dll</HintPath>
       <Private>True</Private>
@@ -118,6 +119,10 @@
     <EmbeddedResource Include="CodeSamples\EntityWithBaseDTO.cs" />
     <EmbeddedResource Include="CodeSamples\NestedEntity.cs" />
     <Compile Include="CodeSamples\SampleCodeProvider.cs" />
+    <EmbeddedResource Include="CodeSamples\SampleTable1.cs" />
+    <EmbeddedResource Include="CodeSamples\SampleTable2.cs" />
+    <EmbeddedResource Include="CodeSamples\SampleTable3.cs" />
+    <EmbeddedResource Include="CodeSamples\SampleTable3MD.cs" />
     <Compile Include="MapperBaseTest.cs" />
     <Compile Include="DtoBuilderTest.cs" />
     <Compile Include="EntityViewModelTest.cs" />

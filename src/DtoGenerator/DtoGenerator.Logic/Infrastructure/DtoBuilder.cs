@@ -18,7 +18,7 @@ namespace DtoGenerator.Logic.Infrastructure
 {
     public class DtoBuilder
     {
-        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null, string mapperNamespace = null, bool generateMapper = true, bool addContractAttrs = false)
+        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null, string mapperNamespace = null, bool generateMapper = true, bool addContractAttrs = false, bool addDataAnnotations = false)
         {
             CompilationUnitSyntax root = null;
 
@@ -57,7 +57,10 @@ namespace DtoGenerator.Logic.Infrastructure
             if (addContractAttrs)
                 root = root.AppendUsing("System.Runtime.Serialization");
 
-            var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity, addContractAttrs);
+            if (addDataAnnotations)
+                root = root.AppendUsing("System.ComponentModel.DataAnnotations");
+
+            var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity, addContractAttrs, addDataAnnotations);
             root = generatedPropertiesAppender.Visit(root) as CompilationUnitSyntax;
 
             var newLineRemover = new NewLineRemover();

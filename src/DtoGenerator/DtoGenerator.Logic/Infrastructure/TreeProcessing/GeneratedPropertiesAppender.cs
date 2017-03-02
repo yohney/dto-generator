@@ -14,10 +14,12 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
     {
         private EntityMetadata _metadata;
         private bool _addDataContractAttrs;
+        private bool _addDataAnnotations;
 
-        public GeneratedPropertiesAppender(EntityMetadata metadata, bool addDataContractAttrs)
+        public GeneratedPropertiesAppender(EntityMetadata metadata, bool addDataContractAttrs, bool addDataAnnotations)
         {
             this._addDataContractAttrs = addDataContractAttrs;
+            this._addDataAnnotations = addDataAnnotations;
             this._metadata = metadata;
         }
 
@@ -33,6 +35,11 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                 if (this._addDataContractAttrs)
                     result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataContract"));
+                else
+                    result = result.WithAttributeLists(new SyntaxList<AttributeListSyntax>());
+
+                if (this._addDataAnnotations && this._metadata.AttributesList!= null)
+                    result = result.AddAttributeLists(this._metadata.AttributesList.ToArray());
 
                 if (this._metadata.BaseClassDtoName != null)
                 {
@@ -192,8 +199,15 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                     var result = SyntaxExtenders.DeclareAutoProperty(type, identifier);
 
+                    
+
                     if (this._addDataContractAttrs)
                         result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataMember"));
+                    else
+                        result = result.WithAttributeLists(new SyntaxList<AttributeListSyntax>());
+
+                    if (this._addDataAnnotations && prop.AttributesList != null)
+                        result = result.AddAttributeLists(prop.AttributesList.ToArray());
 
                     yield return result;
                 }

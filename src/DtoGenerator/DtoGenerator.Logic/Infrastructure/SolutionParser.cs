@@ -68,7 +68,7 @@ namespace Microsoft.CodeAnalysis
         /// <param name="dtoLocation"></param>
         /// <param name="metadata"></param>
         /// <returns>Modified solution containing changes to apply to workspace</returns>
-        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityMetadata metadata, bool generateMapper, bool addContractAttrs)
+        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityMetadata metadata, bool generateMapper, bool addContractAttrs, bool addDataAnnotations)
         {
             var project = solution.Projects
                 .Where(p => p.Name.Contains(dtoLocation.Project))
@@ -101,7 +101,7 @@ namespace Microsoft.CodeAnalysis
                     .FirstOrDefault();
             }
 
-            var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: dtoNamespace, existingDto: existingSyntaxTree, mapperNamespace: mapperNamespace, generateMapper: generateMapper, addContractAttrs: addContractAttrs);
+            var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: dtoNamespace, existingDto: existingSyntaxTree, mapperNamespace: mapperNamespace, generateMapper: generateMapper, addContractAttrs: addContractAttrs, addDataAnnotations: addDataAnnotations);
 
             if (existingDtoDocument == null)
             {
