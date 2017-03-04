@@ -19,7 +19,6 @@
             <RowDefinition Height="31"/>
             <RowDefinition Height="31"/>
             <RowDefinition Height="31"/>
-            <RowDefinition Height="31"/>
             <RowDefinition Height="178*"/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
@@ -40,11 +39,9 @@
         <DockPanel LastChildFill="True" Grid.Row="4" >
             <CheckBox Margin="5,0" IsChecked="{Binding GenerateMapper}" Content="Generate mapper class" VerticalAlignment="Center" />
             <CheckBox Margin="5,0" IsChecked="{Binding AddDataContract}" Content="Use DataContract attributes" VerticalAlignment="Center" />
-        </DockPanel >
-        <DockPanel LastChildFill="True" Grid.Row="5" >
             <CheckBox Margin="5,0" IsChecked="{Binding AddDataAnnotations}" Content="Preserve DataAnnotation" VerticalAlignment="Center" />
         </DockPanel >
-        <TreeView HorizontalAlignment="Stretch"  Margin="5" Grid.Row="6" VerticalAlignment="Stretch" ItemsSource="{Binding EntityModel.Properties}" >
+        <TreeView HorizontalAlignment="Stretch"  Margin="5" Grid.Row="5" VerticalAlignment="Stretch" ItemsSource="{Binding EntityModel.Properties}" >
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding RelatedEntity.Properties}" DataType="{x:Type local:PropertyViewModel}">
                     <StackPanel Orientation="Horizontal">
@@ -54,7 +51,7 @@
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
-        <StackPanel HorizontalAlignment="Right" Grid.Row="7" VerticalAlignment="Stretch" Orientation="Horizontal" Width="220">
+        <StackPanel HorizontalAlignment="Right" Grid.Row="6" VerticalAlignment="Stretch" Orientation="Horizontal" Width="220">
             <Button Width="100" Content="Cancel" Margin="5,0,5,5" Click="Cancel_Click" />
             <Button Width="100" Content="OK" Margin="5,0,5,5" Click="Ok_Click" />
         </StackPanel>

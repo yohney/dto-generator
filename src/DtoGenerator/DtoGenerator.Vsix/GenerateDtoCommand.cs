@@ -237,12 +237,30 @@ namespace DtoGenerator.Vsix
 
                 if (isConfirmed == true)
                 {
-                    var modifiedSolution = await doc.Project.Solution.WriteDto(vm.DtoLocation, vm.EntityModel.ConvertToMetadata(), vm.GenerateMapper, vm.AddDataContract, vm.AddDataAnnotations);
+                    var modifiedSolution = await doc.Project.Solution
+                        .WriteDto(vm.DtoLocation, vm.EntityModel.ConvertToMetadata(), vm.GenerateMapper, vm.AddDataContract, vm.AddDataAnnotations);
+
+                    var changedDocIds = SolutionParser.GetDocumentIdsToOpen(modifiedSolution, workspace.CurrentSolution);
+
                     var ok = workspace.TryApplyChanges(modifiedSolution);
 
                     if (!ok)
                     {
                         VsShellUtilities.ShowMessageBox(this.package, "Unable to generate DTO. Please try again (could not apply changes).", "Error", OLEMSGICON.OLEMSGICON_WARNING, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    }
+                    else
+                    {
+                        foreach(var docId in changedDocIds)
+                        {
+                            try
+                            {
+                                workspace.OpenDocument(docId);
+                            }
+                            catch(Exception)
+                            {
+                                // Do nothing, unable to open the document.
+                            }
+                        }
                     }
                 }
             }

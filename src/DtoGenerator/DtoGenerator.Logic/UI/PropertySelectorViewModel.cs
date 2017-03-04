@@ -214,7 +214,7 @@ namespace DtoGenerator.Logic.UI
                 if (p.IsRelation && !p.IsCollection && depth > 0)
                 {
                     var relatedDoc = await doc.GetRelatedEntityDocument(p.RelatedEntityName);
-                    if(relatedDoc != null)
+                    if(relatedDoc != null && relatedDoc.FilePath != doc.FilePath)
                     {
                         var relatedProperties = existingProperties == null 
                             ? null 

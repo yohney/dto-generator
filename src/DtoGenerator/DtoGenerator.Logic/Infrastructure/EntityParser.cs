@@ -32,11 +32,13 @@ namespace DtoGenerator.Logic.Infrastructure
             typeof(ushort), typeof(System.UInt16),
             typeof(string), typeof(System.String)
         };
-        private static List<string> _ClassDataAnnotationToPreserve = new List<string>()
+
+        private static List<string> _classDataAnnotationToPreserve = new List<string>()
         {
             "MetadataType"
         };
-        private static List<string> _AttributDataAnnotationToPreserve = new List<string>()
+
+        private static List<string> _attributDataAnnotationToPreserve = new List<string>()
         {
             "DisplayName",
             "DisplayFormat",
@@ -47,7 +49,6 @@ namespace DtoGenerator.Logic.Infrastructure
             "DataType",
             "Validation"
         };
-
 
         public static EntityMetadata FromString(string code)
         {
@@ -97,14 +98,13 @@ namespace DtoGenerator.Logic.Infrastructure
 
             var existingRoot = await existingDto.GetSyntaxRootAsync();
             if (existingRoot.ToString().Contains("[MetadataType"))
-            {
                 return true;
-            }
+            
             var classNodes = GetClassNodes(existingRoot);
             var classNode = classNodes.First();
             var properties = GetProperties(classNode);
 
-            return properties.Any(p => p.AttributeLists.Any(a => a.Attributes.Any(att => _AttributDataAnnotationToPreserve.Contains(att.Name.ToString()))));
+            return properties.Any(p => p.AttributeLists.Any(a => a.Attributes.Any(att => _attributDataAnnotationToPreserve.Contains(att.Name.ToString()))));
         }
 
         public static async Task<bool> HasDataContract(Document existingDto)
@@ -170,8 +170,7 @@ namespace DtoGenerator.Logic.Infrastructure
                 }
             }
 
-            result.AttributesList = classNode.AttributeLists.Where(a => a.Attributes.Any(att => _ClassDataAnnotationToPreserve.Contains(att.Name.ToString())))
-                        .Select(a => a.RemoveNodes(a.Attributes.Where(att => !_ClassDataAnnotationToPreserve.Contains(att.Name.ToString())).ToArray(), SyntaxRemoveOptions.KeepNoTrivia)).ToList();
+            result.AttributesList = GetFilteredAttributeList(classNode.AttributeLists, _classDataAnnotationToPreserve);
 
             result.Properties = properties
                 .Select(p => new PropertyMetadata()
@@ -182,12 +181,20 @@ namespace DtoGenerator.Logic.Infrastructure
                     IsCollection = IsCollection(p),
                     IsRelation = IsRelation(p),
                     RelatedEntityName = IsRelation(p) ? GetRelatedEntity(p) : null,
-                    AttributesList = p.AttributeLists.Where(a => a.Attributes.Any(att => _AttributDataAnnotationToPreserve.Contains(att.Name.ToString())))
-                        .Select(a => a.RemoveNodes(a.Attributes.Where(att => !_AttributDataAnnotationToPreserve.Contains(att.Name.ToString())).ToArray(), SyntaxRemoveOptions.KeepNoTrivia)).ToList()
+                    AttributesList = GetFilteredAttributeList(p.AttributeLists, _attributDataAnnotationToPreserve)
                 })
                 .ToList();
 
             return result;
+        }
+
+        private static List<AttributeListSyntax> GetFilteredAttributeList(SyntaxList<AttributeListSyntax> attributeGroups, List<string> attributesToPreserve)
+        {
+            return attributeGroups
+                .Where(a => a.Attributes
+                    .Any(att => attributesToPreserve.Contains(att.Name.ToString())))
+                .Select(a => a.RemoveNodes(a.Attributes.Where(att => !attributesToPreserve.Contains(att.Name.ToString())).ToArray(), SyntaxRemoveOptions.KeepNoTrivia))
+                .ToList();
         }
 
         private static IEnumerable<ClassDeclarationSyntax> GetClassNodes(SyntaxNode root)

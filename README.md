@@ -10,3 +10,5 @@ A visual studio plugin for generating DTO objects from entities
 * Pick properties from entities that you want to map
 
 * Add any custom code between ////BCC/ BEGIN CUSTOM CODE SECTION and ////ECC/ END CUSTOM CODE SECTION. Any custom code will be preserved upon regeneration.
+
+* [See release notes for latest version](src/DtoGenerator/DtoGenerator.Vsix/release-notes.html)

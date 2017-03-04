@@ -155,5 +155,24 @@ namespace Microsoft.CodeAnalysis
 
             return solution.GetDocument(docId);
         }
+
+        public static List<DocumentId> GetDocumentIdsToOpen(Solution newSolution, Solution oldSolution)
+        {
+            try
+            {
+                var changes = newSolution.GetChanges(oldSolution);
+                var addedDocs = changes.GetProjectChanges()
+                    .SelectMany(p => p.GetAddedDocuments());
+
+                var modifiedDocs = changes.GetProjectChanges()
+                    .SelectMany(p => p.GetChangedDocuments());
+
+                return addedDocs.Concat(modifiedDocs).ToList();
+            }
+            catch(Exception)
+            {
+                return new List<DocumentId>();
+            }
+        }
     }
 }
