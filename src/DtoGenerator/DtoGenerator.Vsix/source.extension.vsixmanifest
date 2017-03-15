@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="DtoGenerator.Vsix.Ivan Cesar.fc3ee012-1f8f-496f-933e-08139824c3be" Version="1.7" Language="en-US" Publisher="Ivan Cesar" />
+    <Identity Id="DtoGenerator.Vsix.Ivan Cesar.fc3ee012-1f8f-496f-933e-08139824c3be" Version="1.8" Language="en-US" Publisher="Ivan Cesar" />
     <DisplayName>DTO Generator</DisplayName>
     <Description xml:space="preserve">This simple tool uses Roslyn API to find out about the code, and reads entity properties and generates corresponding DTO object, with mapper class attached.</Description>
     <MoreInfo>https://github.com/yohney/dto-generator</MoreInfo>

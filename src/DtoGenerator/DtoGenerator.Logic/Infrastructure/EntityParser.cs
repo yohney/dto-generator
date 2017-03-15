@@ -71,7 +71,13 @@ namespace DtoGenerator.Logic.Infrastructure
                     foreach (var prop in baseMetadata.Properties)
                         prop.IsInherited = true;
 
-                    metadata.Properties.AddRange(baseMetadata.Properties);
+                    foreach(var baseProp in baseMetadata.Properties)
+                    {
+                        if (metadata.Properties.Any(p => p.Name == baseProp.Name))
+                            continue;
+
+                        metadata.Properties.Add(baseProp);
+                    }
                 }
             }
 

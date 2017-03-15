@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dto\CityDTO.cs" />
+    <Compile Include="Dto\ComputerDTO.cs" />
     <Compile Include="Dto\RoleDTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

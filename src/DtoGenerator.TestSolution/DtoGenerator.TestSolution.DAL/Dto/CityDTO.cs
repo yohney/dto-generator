@@ -26,9 +26,16 @@ namespace DtoGenerator.TestSolution.DAL.Dto
 
     public class CityMapper : MapperBase<City, CityDTO>
     {
-        ////BCC/ BEGIN CUSTOM CODE SECTION
-
-        ////ECC/ END CUSTOM CODE SECTION
+        public override Expression<Func<Role, CityDTO>> CustomSelectorExpression
+        {
+            get
+            {
+                return p => new CityDTO()
+                {
+                    Name = "City from a Role",
+                };
+            }
+        }
 
         public override Expression<Func<City, CityDTO>> SelectorExpression
         {
