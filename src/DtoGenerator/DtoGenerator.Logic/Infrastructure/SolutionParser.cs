@@ -72,7 +72,7 @@ namespace Microsoft.CodeAnalysis
         {
             var project = solution.Projects
                 .Where(p => p.Name.Contains(dtoLocation.Project))
-                .OrderBy(p => p.Name.Length) // Due to .NET core project which have more complex project name, cannot use ==
+                .OrderBy(p => p.Name) // Due to .NET core project which have more complex project name, cannot use ==
                 .FirstOrDefault();
 
             var compilation = await project.GetCompilationAsync();
