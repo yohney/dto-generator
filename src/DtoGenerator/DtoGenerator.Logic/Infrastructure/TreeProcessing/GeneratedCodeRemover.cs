@@ -95,7 +95,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
         public override SyntaxNode VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
-            if(node.FirstAncestorOrSelf<PropertyDeclarationSyntax>().Identifier.Text == "SelectorExpression")
+            if(node.FirstAncestorOrSelf<PropertyDeclarationSyntax>() != null && 
+                node.FirstAncestorOrSelf<PropertyDeclarationSyntax>().Identifier.Text == "SelectorExpression")
             {
                 var customExpressions = node.Initializer.Expressions
                 .Where(p => this._finder.IsNodeWithinCustomCode(p))

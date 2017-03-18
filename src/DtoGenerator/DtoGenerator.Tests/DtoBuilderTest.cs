@@ -112,6 +112,9 @@ namespace DtoGenerator.Tests
             Assert.IsFalse(codeText.Contains("////BCC/ BEGIN CUSTOM CODE SECTION ////ECC/ END CUSTOM CODE SECTION"));
             Assert.IsFalse(codeText.Contains("////ECC/ END CUSTOM CODE SECTION private SomethingMapper"));
             Assert.AreEqual(codeText.IndexOf("MapToModel"), codeText.LastIndexOf("MapToModel"));
+
+            Assert.IsTrue(codeText.Contains("// Some custom property leading comment - should not dissapear"));
+            Assert.IsTrue(codeText.Contains("// Some custom property 2 leading comment - should not dissapear"));
         }
 
         [TestMethod]

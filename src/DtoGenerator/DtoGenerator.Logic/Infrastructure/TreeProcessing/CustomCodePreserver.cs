@@ -153,9 +153,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             where TNode : SyntaxNode
         {
             var leadingTrivia = node.GetLeadingTrivia()
-                    .Add(SyntaxExtenders.EndOfLineTrivia)
-                    .Add(SyntaxFactory.Comment(CustomCodeCommentBegin))
-                    .Add(SyntaxExtenders.EndOfLineTrivia);
+                    .Insert(0, SyntaxExtenders.EndOfLineTrivia)
+                    .Insert(0, SyntaxFactory.Comment(CustomCodeCommentBegin))
+                    .Insert(0, SyntaxExtenders.EndOfLineTrivia);
 
             return node
                 .WithLeadingTrivia(leadingTrivia);

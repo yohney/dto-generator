@@ -9,7 +9,7 @@ namespace Existing.Filled.Dto
     public class ComplexEntityDTO
     {
         ////BCC/ BEGIN CUSTOM CODE SECTION 
-
+        // Some custom property leading comment - should not dissapear
         public int CustomProperty { get; set; }
 
         public int SomeOtherCustomProperty
@@ -63,7 +63,7 @@ namespace Existing.Filled.Dto
                     Somethings3 = p.Somethings3.Select(this._something3Mapper.SelectorExpression),
 
                     ////BCC/ BEGIN CUSTOM CODE SECTION 
-
+                    
                     CustomProperty = p.CustomProperty,
 
                     ////ECC/ END CUSTOM CODE SECTION
@@ -78,8 +78,13 @@ namespace Existing.Filled.Dto
             model.OtherString = dto.OtherString;
 
             ////BCC/ BEGIN CUSTOM CODE SECTION 
-
+            // Some custom property 2 leading comment - should not dissapear
             model.CustomProperty = dto.CustomProperty;
+
+            var t = new ComplexEntityDTO()
+            {
+                CustomProperty = ""
+            };
 
             ////ECC/ END CUSTOM CODE SECTION
         }
