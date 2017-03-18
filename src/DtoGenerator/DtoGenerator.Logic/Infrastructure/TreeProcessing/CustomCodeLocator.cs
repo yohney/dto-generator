@@ -14,8 +14,6 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         public List<int> CustomCodeBeginLocations { get; set; }
         public List<int> CustomCodeEndLocations { get; set; }
 
-        // TODO: add test when there is one custom code section which is not closed
-
         public CustomCodeLocator() : base(SyntaxWalkerDepth.Trivia)
         {
             this.CustomCodeBeginLocations = new List<int>();

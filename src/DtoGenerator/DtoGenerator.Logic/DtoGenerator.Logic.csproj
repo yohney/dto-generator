@@ -113,6 +113,7 @@
     <Compile Include="Infrastructure\SyntaxExtenders.cs" />
     <EmbeddedResource Include="Infrastructure\Template\MapperBase.cs" />
     <Compile Include="Infrastructure\TreeProcessing\BaseDtoClassLocator.cs" />
+    <Compile Include="Infrastructure\TreeProcessing\CustomCodePreserver.cs" />
     <Compile Include="Infrastructure\TreeProcessing\MapperRemover.cs" />
     <Compile Include="Infrastructure\TreeProcessing\GeneratedPropertiesEnumerator.cs" />
     <Compile Include="Infrastructure\TreeProcessing\NewLineRemover.cs" />
@@ -126,7 +127,6 @@
     <Compile Include="UI\PropertySelectorViewModel.cs" />
     <Compile Include="UI\ViewModelBase.cs" />
     <EmbeddedResource Include="Infrastructure\Template\Outline.cs" />
-    <Compile Include="Infrastructure\TreeProcessing\CustomCodeCommentWrapper.cs" />
     <Compile Include="Infrastructure\TreeProcessing\CustomCodeLocator.cs" />
     <Compile Include="Infrastructure\TreeProcessing\EmptyTreeCommentAppender.cs" />
     <Compile Include="Infrastructure\TreeProcessing\GeneratedCodeRemover.cs" />

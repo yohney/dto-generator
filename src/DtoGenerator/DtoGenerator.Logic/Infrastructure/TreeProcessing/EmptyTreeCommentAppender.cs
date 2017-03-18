@@ -38,10 +38,10 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             return SyntaxFactory.TriviaList(
                         new[]{
                             SyntaxExtenders.EndOfLineTrivia,
-                            SyntaxFactory.Comment(CustomCodeCommentWrapper.CustomCodeCommentBegin),
+                            SyntaxFactory.Comment(CustomCodePreserver.CustomCodeCommentBegin),
                             SyntaxExtenders.EndOfLineTrivia,
                             SyntaxExtenders.EndOfLineTrivia,
-                            SyntaxFactory.Comment(CustomCodeCommentWrapper.CustomCodeCommentEnd),
+                            SyntaxFactory.Comment(CustomCodePreserver.CustomCodeCommentEnd),
                             SyntaxExtenders.EndOfLineTrivia,
                             SyntaxExtenders.EndOfLineTrivia});
         }

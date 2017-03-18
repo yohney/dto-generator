@@ -23,10 +23,15 @@ namespace DtoGenerator.Tests
 
             var codeText = tree.ToString();
 
-            foreach (var prop in metadata.Properties)
+            foreach (var prop in metadata.Properties.ToList())
             {
                 Assert.IsTrue(codeText.Contains($"public {prop.Type} {prop.Name} {{ get; set; }}"));
-                Assert.IsTrue(codeText.Contains($"{prop.Name} = p.{prop.Name},"));
+
+                if (prop != metadata.Properties.Last())
+                    Assert.IsTrue(codeText.Contains($"{prop.Name} = p.{prop.Name},"));
+                else
+                    Assert.IsTrue(codeText.Contains($"{prop.Name} = p.{prop.Name}"));
+
                 Assert.IsFalse(codeText.Contains($",{prop.Name} = p.{prop.Name}"));
 
                 Assert.IsTrue(codeText.Contains($"model.{prop.Name} = dto.{prop.Name};"));
@@ -49,10 +54,14 @@ namespace DtoGenerator.Tests
 
             var codeText = tree.ToString();
 
-            foreach (var prop in metadata.Properties)
+            foreach (var prop in metadata.Properties.ToList())
             {
                 Assert.IsTrue(codeText.Contains($"public {prop.Type} {prop.Name} {{ get; set; }}"));
-                Assert.IsTrue(codeText.Contains($"{prop.Name} = p.{prop.Name},"));
+                if(prop != metadata.Properties.Last())
+                    Assert.IsTrue(codeText.Contains($"{prop.Name} = p.{prop.Name},"));
+                else
+                    Assert.IsTrue(codeText.Contains($"{prop.Name} = p.{prop.Name}"));
+                
                 Assert.IsFalse(codeText.Contains($",{prop.Name} = p.{prop.Name}"));
 
                 Assert.IsTrue(codeText.Contains($"model.{prop.Name} = dto.{prop.Name};"));
@@ -98,7 +107,11 @@ namespace DtoGenerator.Tests
 
             Assert.IsTrue(codeText.Contains("List1 = p.List1.AsQueryable().Select(this._somethingMapper.SelectorExpression),"));
             Assert.IsTrue(codeText.Contains("Enumerable2 = p.Enumerable2.AsQueryable().Select(this._somethingMapper.SelectorExpression),"));
-            Assert.IsTrue(codeText.Contains("Collection2 = p.Collection2.AsQueryable().Select(this._somethingMapper.SelectorExpression),"));
+            Assert.IsTrue(codeText.Contains("Collection2 = p.Collection2.AsQueryable().Select(this._somethingMapper.SelectorExpression)"));
+
+            Assert.IsFalse(codeText.Contains("////BCC/ BEGIN CUSTOM CODE SECTION ////ECC/ END CUSTOM CODE SECTION"));
+            Assert.IsFalse(codeText.Contains("////ECC/ END CUSTOM CODE SECTION private SomethingMapper"));
+            Assert.AreEqual(codeText.IndexOf("MapToModel"), codeText.LastIndexOf("MapToModel"));
         }
 
         [TestMethod]

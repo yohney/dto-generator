@@ -39,16 +39,8 @@ namespace DtoGenerator.Logic.Infrastructure
                 var rewriter = new GeneratedCodeRemover(finder);
                 existingRoot = rewriter.Visit(existingRoot);
 
-                if(rewriter.FirstCustomProperty == null)
-                {
-                    var commentAppender = new EmptyTreeCommentAppender();
-                    root = commentAppender.Visit(existingRoot) as CompilationUnitSyntax;
-                }
-                else
-                {
-                    var commentWrapper = new CustomCodeCommentWrapper(rewriter);
-                    root = commentWrapper.Visit(existingRoot) as CompilationUnitSyntax;
-                }
+                var customCodePreserver = new CustomCodePreserver();
+                root = customCodePreserver.Visit(existingRoot) as CompilationUnitSyntax;
             }
 
             if(generateMapper)

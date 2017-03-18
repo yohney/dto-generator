@@ -51,7 +51,11 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
             if (node.Identifier.Text.Contains("Mapper"))
             {
-                int insertIndex = 0;
+                var selectorExpressionProperty = node.Members.OfType<PropertyDeclarationSyntax>()
+                    .Where(p => p.Identifier.ToString() == "SelectorExpression")
+                    .FirstOrDefault();
+
+                int insertIndex = selectorExpressionProperty == null ? 0 : node.Members.IndexOf(selectorExpressionProperty);
                 var membersList = node.Members;
                 foreach (var prop in _metadata.Properties.Where(p => p.IsCollection))
                 {
@@ -104,17 +108,37 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 parentInvocation != null && parentInvocation.ToString().Contains("SelectorExpression"))
             {
                 var initializerExpressions = GenerateInitializerExpressions(_metadata, "", "p.").ToList();
-                var nodeTokenList = SyntaxFactory.NodeOrTokenList(node.ChildNodesAndTokens())
-                    .RemoveAt(node.ChildNodesAndTokens().Count - 1)
-                    .RemoveAt(0);
+                var expressionsWithSeparators = node.AddExpressions(initializerExpressions.ToArray()).Expressions.GetWithSeparators();
 
-                foreach (var exp in initializerExpressions)
+                // This section is here only to format code well. Namely, in initializer expression, to add comma token after each expression and newline after comma.
+                var list = new List<SyntaxNodeOrToken>();
+                var expressionTrailingTrivia = new List<SyntaxTrivia>();
+                
+                foreach(var item in expressionsWithSeparators.ToList())
                 {
-                    nodeTokenList = nodeTokenList.Add(exp);
-                    nodeTokenList = nodeTokenList.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).AppendNewLine());
+                    // This is required if we have a custom code trivia which is attached to expression node, but should be attached after comma-token.
+                    if (item.IsToken)
+                    {
+                        expressionTrailingTrivia.Add(SyntaxExtenders.EndOfLineTrivia);
+                        list.Add(item.AsToken().WithTrailingTrivia(expressionTrailingTrivia.ToArray()));
+                        expressionTrailingTrivia.Clear();
+                    }
+                        
+                    else
+                    {
+                        expressionTrailingTrivia = item.GetTrailingTrivia().ToList();
+                        list.Add(item.WithTrailingTrivia());
+                    }
                 }
 
-                return node.WithExpressions(SyntaxFactory.SeparatedList<ExpressionSyntax>(nodeTokenList));
+                if(list.Any() && list.Last().IsNode)
+                {
+                    var item = list.Last();
+                    list.Remove(item);
+                    list.Add(item.WithTrailingTrivia(expressionTrailingTrivia));
+                }
+
+                return node.WithExpressions(SyntaxFactory.SeparatedList<ExpressionSyntax>(list));
             }
 
             return base.VisitInitializerExpression(node);

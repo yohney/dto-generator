@@ -73,8 +73,8 @@ namespace DtoGenerator.Tests
             var source = await cityDto.GetTextAsync();
             var sourceCode = source.ToString();
 
-            Assert.AreEqual(3, Regex.Matches(sourceCode, CustomCodeCommentWrapper.CustomCodeCommentBegin).Count);
-            Assert.AreEqual(3, Regex.Matches(sourceCode, CustomCodeCommentWrapper.CustomCodeCommentEnd).Count);
+            Assert.AreEqual(4, Regex.Matches(sourceCode, CustomCodePreserver.CustomCodeCommentBegin).Count);
+            Assert.AreEqual(4, Regex.Matches(sourceCode, CustomCodePreserver.CustomCodeCommentEnd).Count);
 
             Assert.IsTrue(sourceCode.Contains("CustomProperty = p.Name + p.PostalCode,"));
         }
