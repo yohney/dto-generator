@@ -63,10 +63,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             {
                 if (node.Expressions.Count == 0)
                 {
-                    node = node.WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
-                        .WithTrailingTrivia(SyntaxFactory.TriviaList(
-                            SyntaxFactory.Comment(CustomCodeCommentBegin),
-                            SyntaxFactory.Comment(CustomCodeCommentEnd))));
+                    node = node.WithOpenBraceToken(GetOpenBraceTokenWithEmptyCustomCode());
                 }
                 else if (node.Expressions.Count == 1)
                 {
@@ -95,10 +92,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             {
                 if(node.Statements.Count == 0)
                 {
-                    node = node.WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
-                        .WithTrailingTrivia(SyntaxFactory.TriviaList(
-                            SyntaxFactory.Comment(CustomCodeCommentBegin),
-                            SyntaxFactory.Comment(CustomCodeCommentEnd))));
+                    node = node.WithOpenBraceToken(GetOpenBraceTokenWithEmptyCustomCode());
                 }
                 else if(node.Statements.Count == 1)
                 {
@@ -123,13 +117,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         {
             if (members.Count == 0)
             {
-                node = node.WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
-                    .WithTrailingTrivia(SyntaxFactory.TriviaList(
-                        SyntaxExtenders.EndOfLineTrivia,
-                        SyntaxFactory.Comment(CustomCodeCommentBegin),
-                        SyntaxExtenders.EndOfLineTrivia,
-                        SyntaxFactory.Comment(CustomCodeCommentEnd),
-                        SyntaxExtenders.EndOfLineTrivia)))
+                node = node.WithOpenBraceToken(GetOpenBraceTokenWithEmptyCustomCode())
                     .WithMembers(SyntaxFactory.List<MemberDeclarationSyntax>());
             }
             else if (members.Count == 1)
@@ -148,6 +136,17 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             }
 
             return node;
+        }
+
+        private SyntaxToken GetOpenBraceTokenWithEmptyCustomCode()
+        {
+            return SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
+                    .WithTrailingTrivia(SyntaxFactory.TriviaList(
+                        SyntaxExtenders.EndOfLineTrivia,
+                        SyntaxFactory.Comment(CustomCodeCommentBegin),
+                        SyntaxExtenders.EndOfLineTrivia,
+                        SyntaxFactory.Comment(CustomCodeCommentEnd),
+                        SyntaxExtenders.EndOfLineTrivia));
         }
 
         private TNode AddLeadingTriviaComment<TNode>(TNode node)
