@@ -13,13 +13,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Text;
+using static DtoGenerator.Logic.UI.PropertySelectorViewModel;
 
 namespace DtoGenerator.Logic.Infrastructure
 {
     public class DtoBuilder
     {
-        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null, string mapperNamespace = null, bool generateMapper = true, bool addContractAttrs = false, bool addDataAnnotations = false)
+        public static SyntaxTree BuildDto(EntityMetadata entity, SyntaxTree existingDto = null, string dtoNamespace = null, string mapperNamespace = null, GeneratorProperties generatorProperties = null)
         {
+            if (generatorProperties == null)
+            {
+                generatorProperties = new GeneratorProperties();
+            }
+
             CompilationUnitSyntax root = null;
 
             if (existingDto == null)
@@ -43,22 +49,22 @@ namespace DtoGenerator.Logic.Infrastructure
                 root = customCodePreserver.Visit(existingRoot) as CompilationUnitSyntax;
             }
 
-            if(generateMapper)
+            if(generatorProperties.generateMapper)
                 root = root.AppendUsing(mapperNamespace, entity.Namespace);
 
-            if (addContractAttrs)
+            if (generatorProperties.addDataContract)
                 root = root.AppendUsing("System.Runtime.Serialization");
 
-            if (addDataAnnotations)
+            if (generatorProperties.addDataAnnotations)
                 root = root.AppendUsing("System.ComponentModel.DataAnnotations");
 
-            var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity, addContractAttrs, addDataAnnotations);
+            var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity, generatorProperties);
             root = generatedPropertiesAppender.Visit(root) as CompilationUnitSyntax;
 
             var newLineRemover = new NewLineRemover();
             root = newLineRemover.Visit(root) as CompilationUnitSyntax;
 
-            if(!generateMapper)
+            if(!generatorProperties.generateMapper)
             {
                 var mapperRemover = new MapperRemover();
                 root = mapperRemover.Visit(root) as CompilationUnitSyntax;

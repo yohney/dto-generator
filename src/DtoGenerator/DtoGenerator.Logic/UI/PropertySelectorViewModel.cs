@@ -31,6 +31,7 @@ namespace DtoGenerator.Logic.UI
 
             instance.AddDataContract = await EntityParser.HasDataContract(existingDto);
             instance.AddDataAnnotations = await EntityParser.HasDataAnnotations(existingDto);
+            instance.RelatedEntiesByObject = await EntityParser.HasEntities(existingDto);
 
             return instance;
         }
@@ -40,57 +41,102 @@ namespace DtoGenerator.Logic.UI
             this.GenerateMapper = true;
         }
 
-        private bool _generateMapper;
+        public class GeneratorProperties
+        {
+            public bool generateMapper;
+            public bool addDataContract;
+            public bool addDataAnnotations;
+            public bool relatedEntiesByObject;
+            public bool mapEntitiesById;
+            public GeneratorProperties()
+            {
+                generateMapper = true; addDataAnnotations = false; addDataContract = false; mapEntitiesById = false; relatedEntiesByObject = false;
+            }
+        }
+
+        private GeneratorProperties _generatorProperties = new GeneratorProperties();
+        public GeneratorProperties SelectedGeneratorProperties
+        {
+            get { return _generatorProperties; }
+        }
+
         public bool GenerateMapper
         {
             get
             {
-                return this._generateMapper;
+                return this._generatorProperties.generateMapper;
             }
             set
             {
-                if (value != this._generateMapper)
+                if (value != this._generatorProperties.generateMapper)
                 {
-                    this._generateMapper = value;
+                    this._generatorProperties.generateMapper = value;
                     this.InvokePropertyChanged(nameof(GenerateMapper));
                 }
             }
         }
 
-        private bool _addDataContract;
         public bool AddDataContract
         {
             get
             {
-                return this._addDataContract;
+                return this._generatorProperties.addDataContract;
             }
             set
             {
-                if (value != this._addDataContract)
+                if (value != this._generatorProperties.addDataContract)
                 {
-                    this._addDataContract = value;
+                    this._generatorProperties.addDataContract = value;
                     this.InvokePropertyChanged(nameof(AddDataContract));
                 }
             }
         }
 
-        private bool _addDataAnnotations;
         public bool AddDataAnnotations
         {
             get
             {
-                return this._addDataAnnotations;
+                return this._generatorProperties.addDataAnnotations;
             }
             set
             {
-                if (value != this._addDataAnnotations)
+                if (value != this._generatorProperties.addDataAnnotations)
                 {
-                    this._addDataAnnotations = value;
+                    this._generatorProperties.addDataAnnotations = value;
                     this.InvokePropertyChanged(nameof(AddDataAnnotations));
                 }
             }
         }
-
+        public bool RelatedEntiesByObject
+        {
+            get
+            {
+                return this._generatorProperties.relatedEntiesByObject;
+            }
+            set
+            {
+                if (value != this._generatorProperties.relatedEntiesByObject)
+                {
+                    this._generatorProperties.relatedEntiesByObject = value;
+                    this.InvokePropertyChanged(nameof(RelatedEntiesByObject));
+                }
+            }
+        }
+        public bool MapEntitiesById
+        {
+            get
+            {
+                return this._generatorProperties.mapEntitiesById;
+            }
+            set
+            {
+                if (value != this._generatorProperties.mapEntitiesById)
+                {
+                    this._generatorProperties.mapEntitiesById = value;
+                    this.InvokePropertyChanged(nameof(MapEntitiesById));
+                }
+            }
+        }
         public SolutionLocation DtoLocation { get; set; }
 
         public string DtoLocationStr => DtoLocation.ToString();
@@ -376,7 +422,9 @@ namespace DtoGenerator.Logic.UI
                     if(this._relatedEntity != null)
                     {
                         foreach (var prop in this._relatedEntity.Properties)
-                            prop.IsSelected = value;
+                        {
+                            if (prop.CanSelect) prop.IsSelected = value;
+                        }
                     }
                 }
             }

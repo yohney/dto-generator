@@ -285,5 +285,44 @@ namespace DtoGenerator.Logic.Infrastructure
             Get,
             Set
         }
+
+        public static PropertyDeclarationSyntax GeneratePropertyDeclarationFromString(string property)
+        {
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(
+@"
+namespace MyNameSapce
+{
+    class MyDTO
+    {
+" + property + @"
+    }
+}");
+            return (PropertyDeclarationSyntax)((ClassDeclarationSyntax)((NamespaceDeclarationSyntax)((CompilationUnitSyntax)tree.GetRoot()).Members[0]).Members[0]).Members[0];
+        }
+
+
+        public static ExpressionSyntax GenerateAssignmentExpressionFromString(string expression)
+        {
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(
+@"
+namespace MyNameSapce
+{
+    class MyMapper
+    {
+        public override Expression<Func<MyEntities, MyDTO>> SelectorExpression
+        {
+            get
+            {
+                return ((Expression<Func<MyEntities, MyDTO>>)(p => new MyDTO()
+                {
+                    " + expression + @"
+                }));
+            }
+        }
+    }
+}");
+
+            return (ExpressionSyntax)tree.GetRoot().DescendantNodes().OfType<AssignmentExpressionSyntax>().FirstOrDefault();
+        }
     }
 }

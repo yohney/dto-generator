@@ -34,8 +34,10 @@ namespace DtoGenerator.Tests.CodeSamples
     
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public Nullable<System.DateTime> Date { get; set; }
-    
+
+        [Required]
         public virtual SampleTable2 SampleTable2 { get; set; }
+        public virtual SampleTable2 SampleTable2_0_1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<SampleTable3> SampleTable3 { get; set; }
     }
