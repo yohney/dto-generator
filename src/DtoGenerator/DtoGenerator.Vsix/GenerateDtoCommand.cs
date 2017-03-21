@@ -238,7 +238,7 @@ namespace DtoGenerator.Vsix
                 if (isConfirmed == true)
                 {
                     var modifiedSolution = await doc.Project.Solution
-                        .WriteDto(vm.DtoLocation, vm.EntityModel.ConvertToMetadata(), vm.SelectedGeneratorProperties);
+                        .WriteDto(vm.DtoLocation, vm.EntityModel, vm.SelectedGeneratorProperties);
 
                     var changedDocIds = SolutionParser.GetDocumentIdsToOpen(modifiedSolution, workspace.CurrentSolution);
 

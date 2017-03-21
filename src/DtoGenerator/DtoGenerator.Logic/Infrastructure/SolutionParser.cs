@@ -69,8 +69,11 @@ namespace Microsoft.CodeAnalysis
         /// <param name="dtoLocation"></param>
         /// <param name="metadata"></param>
         /// <returns>Modified solution containing changes to apply to workspace</returns>
-        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityMetadata metadata, GeneratorProperties generatorProperties)
+        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityViewModel vm, GeneratorProperties generatorProperties)
         {
+            EntityMetadata metadata = null;
+            if (vm != null) metadata = vm.ConvertToMetadata(generatorProperties);
+
             var project = solution.Projects
                 .Where(p => p.Name.Contains(dtoLocation.Project))
                 .OrderBy(p => p.Name) // Due to .NET core project which have more complex project name, cannot use ==

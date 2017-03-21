@@ -176,7 +176,14 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     if (this._generatorProperties.relatedEntiesByObject)
                     {
                         string relatedType = prop.RelatedEntityName + "DTO";
-                        string AssignmentExpression = prop.Name + " = " + selectorPrefix + prop.Name + ".Select(s => new " + relatedType + "() { Id = s.Id, Title = s.Title, Description = s.Description, Value = s.Value }).ToList(),";
+                        string AssignmentExpression = prop.Name + " = " + selectorPrefix + prop.Name + ".Select(s => new " + relatedType + "() {";
+                        if (prop.RelationMetadata != null)
+                        {
+                            foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, "",  "s.", verifyNotNull: false))
+                                AssignmentExpression = AssignmentExpression + " " + x.ToString() + ',';
+                        }
+                        AssignmentExpression = AssignmentExpression + "}).ToList(),";
+                        //Id = s.Id, Title = s.Title, Description = s.Description, Value = s.Value }).ToList(),";
 
                         var result = SyntaxExtenders.GenerateAssignmentExpressionFromString(AssignmentExpression);
                         yield return result;
