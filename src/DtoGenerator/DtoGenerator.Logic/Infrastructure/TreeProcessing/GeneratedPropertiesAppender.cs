@@ -148,23 +148,63 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             if (node.FirstAncestorOrSelf<MethodDeclarationSyntax>() != null && node.FirstAncestorOrSelf<MethodDeclarationSyntax>().Identifier.Text == "MapToModel")
             {
                 var statements = node.Statements;
-                foreach (var prop in _metadata.Properties.Where(p => !p.IsRelation))
-                {
-                    var st = SyntaxExtenders.AssignmentStatement("model." + prop.Name, "dto." + prop.Name);
-                    statements = statements.Add(st);
-                }
-
+                statements = statements.AddRange(GenerateMapToModelExpression(_metadata));
                 if (!string.IsNullOrWhiteSpace(this._metadata.BaseClassDtoName))
                 {
                     var mapperField = this.GenerateMapperFieldName(this._metadata.BaseClassDtoName);
                     var st = SyntaxExtenders.InvocationStatement($"this.{mapperField}.MapToModel", "dto", "model");
                     statements = statements.Add(st);
                 }
-
                 return node.WithStatements(statements);
             }
 
             return base.VisitBlock(node);
+        }
+
+        private List<ExpressionStatementSyntax> GenerateMapToModelExpression(EntityMetadata metadata, string prefixModel = "model.", string prefixDTO = "dto.")
+        {
+            List<ExpressionStatementSyntax> statements = new List<ExpressionStatementSyntax>();
+            foreach (var prop in metadata.Properties)
+            {
+                if (prop.IsCollection)
+                {
+                    if (this._generatorProperties.relatedEntiesByObject)
+                    {
+                        string AssignmentExpression = prefixModel + prop.Name + " = (" + prefixDTO + prop.Name + " == null)? null : " + prefixDTO + prop.Name + ".Select(s => new " + prop.RelatedEntityName + "() { ";
+                        if (prop.RelationMetadata != null)
+                        {
+                            foreach (var x in GenerateMapToModelExpression(prop.RelationMetadata, "", "s."))
+                                AssignmentExpression = AssignmentExpression + " " + x.ToString().Replace(';', ',');
+                        }
+                        AssignmentExpression = AssignmentExpression + " }).ToList();";
+                        var st = SyntaxExtenders.AssignmentStatementFromString(AssignmentExpression);
+                        statements.Add(st);
+                    }
+                }
+                else if (prop.IsRelation)
+                {
+                    if (this._generatorProperties.relatedEntiesByObject)
+                    {
+                        string AssignmentExpression = prefixModel + prop.Name + " = (" + prefixDTO + prop.Name + " == null) ? null : new " + prop.RelatedEntityName + "() { ";
+                        if (prop.RelationMetadata != null)
+                        {
+                            foreach (var x in GenerateMapToModelExpression(prop.RelationMetadata, "", prefixDTO + prop.Name + "."))
+                                AssignmentExpression = AssignmentExpression + " " + x.ToString().Replace(';', ',');
+                        }
+                        AssignmentExpression = AssignmentExpression + " };";
+                        var st = SyntaxExtenders.AssignmentStatementFromString(AssignmentExpression);
+                        statements.Add(st);
+                    }
+                }
+                else
+                {
+                    var st = SyntaxExtenders.AssignmentStatement(prefixModel + prop.Name, prefixDTO + prop.Name);
+                    statements.Add(st);
+                }
+
+            }
+
+            return statements;
         }
 
         private IEnumerable<ExpressionSyntax> GenerateInitializerExpressions(EntityMetadata metadata, string propPrefix, string selectorPrefix, bool verifyNotNull = false)
@@ -267,8 +307,17 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                             string relatedType = prop.RelatedEntityName + "DTO";
                             if (this._generatorProperties.mapEntitiesById)
                             {
-                                var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public int " + identifier + "Id { get { return " + identifier + " != null ? " + identifier + ".Id : 0; } set { " + identifier + " = new " + relatedType + "() { Id = value }; } }");
-                                yield return AddAttributes(prop, resultId);
+                                if (!prop.AttributesList.Any(a => a.Attributes.Any(a2 => a2.Name.ToString() == "Required")))
+                                {
+                                    var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public Nullable<int> " + identifier + "Id { get { return " + identifier + "?.Id; } set { " + identifier + " = (value == null) ? null : new " + relatedType + "() { Id = value.Value }; } }");
+                                    yield return AddAttributes(prop, resultId);
+
+                                }
+                                else
+                                {
+                                    var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public int " + identifier + "Id { get { return " + identifier + " != null ? " + identifier + ".Id : 0; } set { " + identifier + " = new " + relatedType + "() { Id = value }; } }");
+                                    yield return AddAttributes(prop, resultId);
+                                }
                             }
 
                             type = SyntaxFactory.IdentifierName(relatedType);

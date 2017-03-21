@@ -201,6 +201,7 @@ namespace DtoGenerator.Logic.Infrastructure
                 .AppendNewLine();
         }
 
+
         public static AccessorDeclarationSyntax PropertyAccessor(PropertyAccessorType type)
         {
             var syntaxKind = type == PropertyAccessorType.Get ? SyntaxKind.GetAccessorDeclaration : SyntaxKind.SetAccessorDeclaration;
@@ -324,5 +325,26 @@ namespace MyNameSapce
 
             return (ExpressionSyntax)tree.GetRoot().DescendantNodes().OfType<AssignmentExpressionSyntax>().FirstOrDefault();
         }
+
+
+        public static ExpressionStatementSyntax AssignmentStatementFromString(string expression)
+        {
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(
+@"
+namespace MyNameSapce
+{
+    class MyMapper
+    {
+        public override void MapToModel(MyDTO dto, MyEntities model)
+        {
+            " + expression + @"
+        }
+    }
+}");
+
+            return (ExpressionStatementSyntax)tree.GetRoot().DescendantNodes().OfType<ExpressionStatementSyntax>().FirstOrDefault();
+        }
+
+
     }
 }
