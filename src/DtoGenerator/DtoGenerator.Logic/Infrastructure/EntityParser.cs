@@ -40,6 +40,12 @@ namespace DtoGenerator.Logic.Infrastructure
 
         private static List<string> _attributDataAnnotationToPreserve = new List<string>()
         {
+            "Key",
+            "TimeStamp",
+            "ConcurrencyCheck",
+            "MaxLength",
+            "MinLength",
+            "ForeignKey",
             "DisplayName",
             "DisplayFormat",
             "Required",

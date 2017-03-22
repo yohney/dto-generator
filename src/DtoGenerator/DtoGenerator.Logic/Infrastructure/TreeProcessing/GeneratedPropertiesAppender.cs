@@ -56,10 +56,14 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                 int insertIndex = selectorExpressionProperty == null ? 0 : node.Members.IndexOf(selectorExpressionProperty);
                 var membersList = node.Members;
-                foreach (var prop in _metadata.Properties.Where(p => p.IsCollection))
+
+                if (!_generatorProperties.relatedEntiesByObject)
                 {
-                    var newField = SyntaxExtenders.DeclareField(type: GenerateMapperTypeName(prop.RelatedEntityName), autoCreateNew: true);
-                    membersList = membersList.Insert(insertIndex++, newField);
+                    foreach (var prop in _metadata.Properties.Where(p => p.IsCollection))
+                    {
+                        var newField = SyntaxExtenders.DeclareField(type: GenerateMapperTypeName(prop.RelatedEntityName), autoCreateNew: true);
+                        membersList = membersList.Insert(insertIndex++, newField);
+                    }
                 }
 
                 if (this._metadata.BaseClassDtoName != null)
@@ -67,6 +71,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     var newField = SyntaxExtenders.DeclareField(type: GenerateMapperTypeName(this._metadata.BaseClassDtoName), autoCreateNew: true);
                     membersList = membersList.Insert(insertIndex++, newField);
                 }
+
 
                 return base.VisitClassDeclaration(node.WithMembers(membersList));
             }
