@@ -96,7 +96,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { generateMapper = false});
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { GenerateMapper = false});
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -327,7 +327,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { addDataContract = true });
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { AddDataContract = true });
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -363,7 +363,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { generateMapper = false });
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { GenerateMapper = false });
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -528,7 +528,7 @@ namespace DtoGenerator.Tests
             var dtoLocation = solution.GetMostLikelyDtoLocation();
             var vm = await PropertySelectorViewModel.Create(sampleTable1Doc, "SampleTable1DTO", dtoLocation, existingDto);
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.EntityModel, new GeneratorProperties() { addDataAnnotations=true, relatedEntiesByObject=true, mapEntitiesById =true });
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.EntityModel, new GeneratorProperties() { AddDataAnnotations=true, RelatedEntiesByObject=true, MapEntitiesById =true });
             Assert.IsNotNull(modifiedSolution);
 
             var sampleTable1DTO = modifiedSolution.GetChanges(solution)

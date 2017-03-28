@@ -32,12 +32,12 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
                 var result = node.WithMembers(membersList);
 
-                if (this._generatorProperties.addDataContract)
+                if (this._generatorProperties.AddDataContract)
                     result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataContract"));
                 else
                     result = result.WithAttributeLists(new SyntaxList<AttributeListSyntax>());
 
-                if (this._generatorProperties.addDataAnnotations && this._metadata.AttributesList!= null)
+                if (this._generatorProperties.AddDataAnnotations && this._metadata.AttributesList!= null)
                     result = result.AddAttributeLists(this._metadata.AttributesList.ToArray());
 
                 if (this._metadata.BaseClassDtoName != null)
@@ -57,7 +57,7 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 int insertIndex = selectorExpressionProperty == null ? 0 : node.Members.IndexOf(selectorExpressionProperty);
                 var membersList = node.Members;
 
-                if (!_generatorProperties.relatedEntiesByObject)
+                if (!_generatorProperties.RelatedEntiesByObject)
                 {
                     foreach (var prop in _metadata.Properties.Where(p => p.IsCollection))
                     {
@@ -166,20 +166,25 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             return base.VisitBlock(node);
         }
 
-        private List<ExpressionStatementSyntax> GenerateMapToModelExpression(EntityMetadata metadata, string prefixModel = "model.", string prefixDTO = "dto.")
+        private List<ExpressionStatementSyntax> GenerateMapToModelExpression(EntityMetadata metadata, string prefixModel = "model.", string prefixDTO = "dto.", int depth = 1)
         {
             List<ExpressionStatementSyntax> statements = new List<ExpressionStatementSyntax>();
             foreach (var prop in metadata.Properties)
             {
                 if (prop.IsCollection)
                 {
-                    if (this._generatorProperties.relatedEntiesByObject)
+                    if (this._generatorProperties.RelatedEntiesByObject)
                     {
-                        string AssignmentExpression = prefixModel + prop.Name + " = (" + prefixDTO + prop.Name + " == null)? null : " + prefixDTO + prop.Name + ".Select(s => new " + prop.RelatedEntityName + "() { ";
+                        string AssignmentExpression = prefixModel + prop.Name + " = (" + prefixDTO + prop.Name + " == null)? null : " + prefixDTO + prop.Name + ".Select(s" + depth +" => new " + prop.RelatedEntityName + "() { ";
                         if (prop.RelationMetadata != null)
                         {
-                            foreach (var x in GenerateMapToModelExpression(prop.RelationMetadata, "", "s."))
-                                AssignmentExpression = AssignmentExpression + " " + x.ToString().Replace(';', ',');
+                            string AssignmentProperties = "";
+                            foreach (var x in GenerateMapToModelExpression(prop.RelationMetadata, "", "s" + depth + ".", depth: depth + 1))
+                                AssignmentProperties = AssignmentProperties + " " + x.ToString().Replace(';', ',');
+                            if (!string.IsNullOrEmpty(AssignmentProperties))
+                            {
+                                AssignmentExpression = AssignmentExpression + AssignmentProperties.Substring(0, AssignmentProperties.Length - 1);
+                            }
                         }
                         AssignmentExpression = AssignmentExpression + " }).ToList();";
                         var st = SyntaxExtenders.AssignmentStatementFromString(AssignmentExpression);
@@ -188,13 +193,18 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 }
                 else if (prop.IsRelation)
                 {
-                    if (this._generatorProperties.relatedEntiesByObject)
+                    if (this._generatorProperties.RelatedEntiesByObject)
                     {
                         string AssignmentExpression = prefixModel + prop.Name + " = (" + prefixDTO + prop.Name + " == null) ? null : new " + prop.RelatedEntityName + "() { ";
                         if (prop.RelationMetadata != null)
                         {
-                            foreach (var x in GenerateMapToModelExpression(prop.RelationMetadata, "", prefixDTO + prop.Name + "."))
-                                AssignmentExpression = AssignmentExpression + " " + x.ToString().Replace(';', ',');
+                            string AssignmentProperties = "";
+                            foreach (var x in GenerateMapToModelExpression(prop.RelationMetadata, "", prefixDTO + prop.Name + ".", depth: depth + 1))
+                                AssignmentProperties = AssignmentProperties + " " + x.ToString().Replace(';', ',');
+                            if (!string.IsNullOrEmpty(AssignmentProperties))
+                            {
+                                AssignmentExpression = AssignmentExpression + AssignmentProperties.Substring(0, AssignmentProperties.Length - 1);
+                            }
                         }
                         AssignmentExpression = AssignmentExpression + " };";
                         var st = SyntaxExtenders.AssignmentStatementFromString(AssignmentExpression);
@@ -212,23 +222,27 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
             return statements;
         }
 
-        private IEnumerable<ExpressionSyntax> GenerateInitializerExpressions(EntityMetadata metadata, string propPrefix, string selectorPrefix, bool verifyNotNull = false)
+        private IEnumerable<ExpressionSyntax> GenerateInitializerExpressions(EntityMetadata metadata, string propPrefix, string selectorPrefix, bool verifyNotNull = false, int depth = 1)
         {
             foreach (var prop in metadata.Properties)
             {
                 if (prop.IsCollection)
                 {
-                    if (this._generatorProperties.relatedEntiesByObject)
+                    if (this._generatorProperties.RelatedEntiesByObject)
                     {
                         string relatedType = prop.RelatedEntityName + "DTO";
-                        string AssignmentExpression = prop.Name + " = " + selectorPrefix + prop.Name + ".Select(s => new " + relatedType + "() {";
+                        string AssignmentExpression = prop.Name + " = " + selectorPrefix + prop.Name + ".Select(s" + depth +" => new " + relatedType + "() {";
                         if (prop.RelationMetadata != null)
                         {
-                            foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, "",  "s.", verifyNotNull: false))
-                                AssignmentExpression = AssignmentExpression + " " + x.ToString() + ',';
+                            string AssignmentProperties = "";
+                            foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, "",  "s" + depth +".", verifyNotNull: false, depth: depth+1))
+                            {
+                                if (!string.IsNullOrEmpty(AssignmentProperties)) AssignmentProperties = AssignmentProperties + ",";
+                                AssignmentProperties = AssignmentProperties + " " + x.ToString();
+                            }
+                            AssignmentExpression = AssignmentExpression + AssignmentProperties;
                         }
-                        AssignmentExpression = AssignmentExpression + "}).ToList(),";
-                        //Id = s.Id, Title = s.Title, Description = s.Description, Value = s.Value }).ToList(),";
+                        AssignmentExpression = AssignmentExpression + "}).ToList()";
 
                         var result = SyntaxExtenders.GenerateAssignmentExpressionFromString(AssignmentExpression);
                         yield return result;
@@ -250,23 +264,30 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                 }
                 else if (prop.IsRelation )
                 {
-                    if (this._generatorProperties.relatedEntiesByObject)
+                    if (this._generatorProperties.RelatedEntiesByObject)
                     {
                         string relatedType = prop.RelatedEntityName + "DTO";
                         string AssignmentExpression = prop.Name + " = (" + selectorPrefix + prop.Name + " == null) ? null : new " + relatedType + "() {";
                         if (prop.RelationMetadata != null)
                         {
-                            foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, "" , selectorPrefix + prop.Name + ".", verifyNotNull: false))
-                                AssignmentExpression = AssignmentExpression + " " + x.ToString() + ',';
+                            string AssignmentProperties = "";
+                            foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, "", selectorPrefix + prop.Name + ".", verifyNotNull: false, depth: depth + 1))
+                            {
+                                if (!string.IsNullOrEmpty(AssignmentProperties))
+                                {
+                                    AssignmentProperties = AssignmentProperties + ",";
+                                }
+                                AssignmentProperties = AssignmentProperties + " " + x.ToString();
+                            }
+                            AssignmentExpression = AssignmentExpression + AssignmentProperties;
                         }
-                        AssignmentExpression = AssignmentExpression +"},";
-
+                        AssignmentExpression = AssignmentExpression +"}";
                         var result = SyntaxExtenders.GenerateAssignmentExpressionFromString(AssignmentExpression);
                         yield return result;
                     }
                     else if (prop.RelationMetadata != null)
                     {
-                        foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, propPrefix + prop.Name, selectorPrefix + prop.Name + ".", verifyNotNull: true))
+                        foreach (var x in GenerateInitializerExpressions(prop.RelationMetadata, propPrefix + prop.Name, selectorPrefix + prop.Name + ".", verifyNotNull: true, depth: depth + 1))
                             yield return x;
                     }
                 }
@@ -281,12 +302,12 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
         {
             foreach (var prop in metadata.Properties)
             {
-                if (!this._generatorProperties.relatedEntiesByObject && prop.IsRelation && !prop.IsCollection && prop.RelationMetadata != null)
+                if (!this._generatorProperties.RelatedEntiesByObject && prop.IsRelation && !prop.IsCollection && prop.RelationMetadata != null)
                 {
                     foreach (var x in GenerateProperties(prop.RelationMetadata, prefix + prop.Name))
                         yield return x;
                 }
-                else if ((this._generatorProperties.relatedEntiesByObject && prop.IsRelation )|| prop.IsCollection || prop.IsSimpleProperty)
+                else if ((this._generatorProperties.RelatedEntiesByObject && prop.IsRelation )|| prop.IsCollection || prop.IsSimpleProperty)
                 {
                     TypeSyntax type = null;
                     var identifier = prefix + prop.Name;
@@ -295,9 +316,9 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     {
                         string relatedType = prop.RelatedEntityName + "DTO";
                         type = relatedType.ToCollectionType("IEnumerable");
-                        if (this._generatorProperties.relatedEntiesByObject)
+                        if (this._generatorProperties.RelatedEntiesByObject)
                         {
-                            if (this._generatorProperties.mapEntitiesById)
+                            if (this._generatorProperties.MapEntitiesById)
                             {
                                 var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public ICollection<int> " + identifier + "Ids { get { return " + identifier + "?.Select(s => s.Id).ToList(); } set { " + identifier + " = value.Select(v => new " + relatedType + "() { Id = v }).ToList(); } }");
                                 yield return AddAttributes(prop, resultId);
@@ -307,10 +328,10 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                     }
                     else if (prop.IsRelation)
                     {
-                        if (this._generatorProperties.relatedEntiesByObject)
+                        if (this._generatorProperties.RelatedEntiesByObject)
                         {
                             string relatedType = prop.RelatedEntityName + "DTO";
-                            if (this._generatorProperties.mapEntitiesById)
+                            if (this._generatorProperties.MapEntitiesById)
                             {
                                 if (!prop.AttributesList.Any(a => a.Attributes.Any(a2 => a2.Name.ToString() == "Required")))
                                 {
@@ -342,12 +363,12 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 
         private PropertyDeclarationSyntax AddAttributes(PropertyMetadata prop, PropertyDeclarationSyntax result)
         {
-            if (this._generatorProperties.addDataContract)
+            if (this._generatorProperties.AddDataContract)
                 result = result.WithAttributeLists(SyntaxExtenders.CreateAttributes("DataMember"));
             else
                 result = result.WithAttributeLists(new SyntaxList<AttributeListSyntax>());
 
-            if (this._generatorProperties.addDataAnnotations && prop.AttributesList != null)
+            if (this._generatorProperties.AddDataAnnotations && prop.AttributesList != null)
                 result = result.AddAttributeLists(prop.AttributesList.ToArray());
             return result;
         }

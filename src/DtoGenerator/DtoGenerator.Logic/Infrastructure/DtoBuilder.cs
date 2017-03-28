@@ -49,13 +49,13 @@ namespace DtoGenerator.Logic.Infrastructure
                 root = customCodePreserver.Visit(existingRoot) as CompilationUnitSyntax;
             }
 
-            if(generatorProperties.generateMapper)
+            if(generatorProperties.GenerateMapper)
                 root = root.AppendUsing(mapperNamespace, entity.Namespace);
 
-            if (generatorProperties.addDataContract)
+            if (generatorProperties.AddDataContract)
                 root = root.AppendUsing("System.Runtime.Serialization");
 
-            if (generatorProperties.addDataAnnotations)
+            if (generatorProperties.AddDataAnnotations)
                 root = root.AppendUsing("System.ComponentModel.DataAnnotations");
 
             var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity, generatorProperties);
@@ -64,7 +64,7 @@ namespace DtoGenerator.Logic.Infrastructure
             var newLineRemover = new NewLineRemover();
             root = newLineRemover.Visit(root) as CompilationUnitSyntax;
 
-            if(!generatorProperties.generateMapper)
+            if(!generatorProperties.GenerateMapper)
             {
                 var mapperRemover = new MapperRemover();
                 root = mapperRemover.Visit(root) as CompilationUnitSyntax;

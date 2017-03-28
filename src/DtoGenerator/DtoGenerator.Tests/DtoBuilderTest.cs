@@ -148,7 +148,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable1DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties:new GeneratorProperties() { addDataAnnotations=true});
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties:new GeneratorProperties() { AddDataAnnotations=true});
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
@@ -167,7 +167,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable3DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties:new GeneratorProperties() { addDataAnnotations=true});
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties:new GeneratorProperties() { AddDataAnnotations=true});
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
@@ -181,7 +181,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable2DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { addDataAnnotations = false });
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { AddDataAnnotations = false });
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
@@ -200,7 +200,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable2DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { addDataContract=true, addDataAnnotations = true });
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { AddDataContract=true, AddDataAnnotations = true });
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
@@ -219,7 +219,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable1DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { addDataAnnotations = true, relatedEntiesByObject=true, mapEntitiesById=true });
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { AddDataAnnotations = true, RelatedEntiesByObject=true, MapEntitiesById=true });
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();

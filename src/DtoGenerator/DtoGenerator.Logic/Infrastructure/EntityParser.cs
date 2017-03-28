@@ -196,19 +196,57 @@ namespace DtoGenerator.Logic.Infrastructure
             if (mapper == null)
                 return mappedProperties;
 
+            mappedProperties.AddRange(ExtractPropertiesRecursif(selectorExpression));
 
+            return mappedProperties;
+        }
 
-
-            foreach (AssignmentExpressionSyntax x in selectorExpression.DescendantNodes().OfType<AssignmentExpressionSyntax>())
+        private static List<string> ExtractPropertiesRecursif(SyntaxNode initContainer, string prefixInCode = "p.", string prefixInList = "")
+        {
+            List<string> mappedProperties = new List<string>();
+            InitializerExpressionSyntax init = initContainer.DescendantNodes().OfType<InitializerExpressionSyntax>().FirstOrDefault();
+            if (init != null)
             {
-                var init = x.DescendantNodes().OfType<InitializerExpressionSyntax>();
-                int count = x.ChildNodes().Count();
-                foreach(var y in x.DescendantNodes().OfType<AssignmentExpressionSyntax>())
+                bool parentAdded = false;
+                foreach (var y in init.ChildNodes().OfType<AssignmentExpressionSyntax>())
                 {
-                    mappedProperties.Add(x.Left + "." + y.Left);
+                    if (y.Right.ToString().Length > prefixInCode.Length && y.Right.ToString().Substring(0, prefixInCode.Length) == prefixInCode)
+                    {
+                        string propertySelected = y.Right.ToString().Substring(prefixInCode.Length);
+
+                        if (propertySelected.IndexOf(".Select(") > 0)
+                        {
+                            string subProperties = prefixInList + propertySelected.Substring(0, propertySelected.IndexOf(".Select("));
+                            //subProperties is a collection
+
+                            string subPrefixInCode = propertySelected.Substring(propertySelected.IndexOf(".Select(") + 8);
+                            subPrefixInCode = (subPrefixInCode.Substring(0, subPrefixInCode.IndexOf("=>"))).Trim();
+                            //add properties of the collection
+                            mappedProperties.AddRange(ExtractPropertiesRecursif(y, subPrefixInCode + ".", subProperties + "."));
+                        }
+                        else
+                        {
+                            string property = prefixInList + propertySelected;
+                            if (!parentAdded)
+                            {
+                                if (property.LastIndexOf('.') > 0)
+                                {
+                                    string parentProperty = property.Substring(0, property.LastIndexOf('.'));
+                                    mappedProperties.Add(parentProperty);
+                                }
+                                parentAdded = true;
+                            }
+                            mappedProperties.Add(property);
+                        }
+                    }
+                    else
+                    {
+                        //mappedProperties.Add(prefixInList + y.Left);
+                        mappedProperties.AddRange(ExtractPropertiesRecursif(y, prefixInCode, prefixInList));
+                    }
                 }
             }
-
+  
             return mappedProperties;
         }
 

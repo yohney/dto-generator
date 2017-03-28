@@ -90,14 +90,14 @@ namespace Microsoft.CodeAnalysis
             var mapperNamespace = "unknown";
 
             var mapperDoc = compilation.GetDocumentForSymbol(project.Solution, "MapperBase");
-            if(mapperDoc == null && generatorProperties.generateMapper)
+            if(mapperDoc == null && generatorProperties.GenerateMapper)
             {
                 var mapperFolderStructure = dtoLocation.GetFolders().Concat(new[] { "Infrastructure" });
                 mapperNamespace = dtoNamespace + ".Infrastructure";
 
                 project = project.AddDocument("MapperBase.cs", DtoBuilder.BuildMapper(mapperNamespace), folders: mapperFolderStructure).Project;
             }
-            else if(generatorProperties.generateMapper)
+            else if(generatorProperties.GenerateMapper)
             {
                 var mapperSyntax = await mapperDoc.GetSyntaxRootAsync();
                 mapperNamespace = mapperSyntax.DescendantNodesAndSelf(p => !p.IsKind(CSharp.SyntaxKind.NamespaceDeclaration))
