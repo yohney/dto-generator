@@ -40,6 +40,12 @@ namespace #Namespace#
             return (new List<TEntity>() { entity }).AsQueryable().Select(expression).SingleOrDefault();
         }
 
+        public static IQueryable<TDto> ToListDTO<TEntity, TDto>(this IQueryable<TEntity> entities,
+            Expression<Func<TEntity, TDto>> expression)
+        {
+            return entities.Select(expression);
+        }
+
         class ParameterReplaceVisitor : ExpressionVisitor
         {
             private readonly ParameterExpression from, to;
