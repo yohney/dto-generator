@@ -139,7 +139,9 @@ namespace DtoGenerator.Logic.Infrastructure
             var classNode = classNodes.First();
             var properties = GetProperties(classNode);
 
-            bool result = properties.Any(p => p.Type.ToString().Length > 3 && p.Type.ToString().Substring(p.Type.ToString().Length - 3, 3) == "DTO");
+            bool result = properties.Any(p => (p.Type.ToString().Length > 3 && p.Type.ToString().Substring(p.Type.ToString().Length - 3, 3) == "DTO")
+            ||(p.Type.ToString().Length > 14 && p.Type.ToString().Substring(0, 11) == "ICollection" && p.Type.ToString().Substring(p.Type.ToString().Length - 4, 3) == "DTO")
+            );
 
             return result;
         }
