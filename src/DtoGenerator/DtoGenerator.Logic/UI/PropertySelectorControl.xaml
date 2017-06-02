@@ -45,6 +45,7 @@
         <DockPanel LastChildFill="True" Grid.Row="5" >
             <CheckBox Margin="5,0" IsChecked="{Binding RelatedEntiesByObject}" Content="Use dto objects for related entities" VerticalAlignment="Center" />
             <CheckBox Margin="5,0" IsChecked="{Binding MapEntitiesById}" Content="Map related entities by id" VerticalAlignment="Center" />
+            <CheckBox Margin="5,0" IsChecked="{Binding StyleCop}" Content="StyleCop Compatibility" VerticalAlignment="Center" />
         </DockPanel >
         <TreeView HorizontalAlignment="Stretch"  Margin="5" Grid.Row="6" VerticalAlignment="Stretch" ItemsSource="{Binding EntityModel.Properties}" >
             <TreeView.ItemTemplate>

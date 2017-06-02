@@ -11,8 +11,8 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
 {
     public class CustomCodePreserver : CSharpSyntaxRewriter
     {
-        public const string CustomCodeCommentBegin = "////BCC/ BEGIN CUSTOM CODE SECTION ";
-        public const string CustomCodeCommentEnd = "////ECC/ END CUSTOM CODE SECTION ";
+        public const string CustomCodeCommentBegin = "////BCC/ BEGIN CUSTOM CODE SECTION";
+        public const string CustomCodeCommentEnd = "////ECC/ END CUSTOM CODE SECTION";
 
         public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
         {

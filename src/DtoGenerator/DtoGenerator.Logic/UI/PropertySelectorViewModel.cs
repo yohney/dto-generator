@@ -41,6 +41,8 @@ namespace DtoGenerator.Logic.UI
 
             instance.AddDataContract = await EntityParser.HasDataContract(existingDto);
             instance.AddDataAnnotations = await EntityParser.HasDataAnnotations(existingDto);
+            instance.StyleCop = await EntityParser.HasStyleCop(existingDto);
+
             if (instance.RelatedEntiesByObject)
                 instance.MapEntitiesById = await EntityParser.HasMapEntitiesById(existingDto);
 
@@ -59,9 +61,10 @@ namespace DtoGenerator.Logic.UI
             public bool AddDataAnnotations { get; set; }
             public bool RelatedEntiesByObject { get; set; }
             public bool MapEntitiesById { get; set; }
+            public bool StyleCop { get; set; }
             public GeneratorProperties()
             {
-                GenerateMapper = true; AddDataAnnotations = false; AddDataContract = false; MapEntitiesById = false; RelatedEntiesByObject = false;
+                GenerateMapper = true; AddDataAnnotations = false; AddDataContract = false; MapEntitiesById = false; RelatedEntiesByObject = false; StyleCop = false;
             }
         }
 
@@ -118,6 +121,23 @@ namespace DtoGenerator.Logic.UI
                 }
             }
         }
+
+        public bool StyleCop
+        {
+            get
+            {
+                return this._selectedGeneratorProperties.StyleCop;
+            }
+            set
+            {
+                if (value != this._selectedGeneratorProperties.StyleCop)
+                {
+                    this._selectedGeneratorProperties.StyleCop = value;
+                    this.InvokePropertyChanged(nameof(StyleCop));
+                }
+            }
+        }
+
         public bool RelatedEntiesByObject
         {
             get

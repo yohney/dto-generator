@@ -58,6 +58,31 @@ namespace DtoGenerator.Logic.Infrastructure
 
             return node.WithUsings(usings);
         }
+        public static NamespaceDeclarationSyntax AppendUsing(this NamespaceDeclarationSyntax node, params string[] usingDirectives)
+        {
+            var newUsingListString = node.DescendantNodes(p => !(p is ClassDeclarationSyntax))
+                .OfType<UsingDirectiveSyntax>()
+                .Select(p => p.Name.ToString())
+                .ToList();
+
+            foreach (var x in usingDirectives)
+            {
+                if (x == null || newUsingListString.Contains(x))
+                    continue;
+
+                newUsingListString.Add(x);
+            }
+            newUsingListString.Sort();
+
+            var usings = node.Usings;
+            while (usings.Count > 0)
+            {
+                usings = usings.RemoveAt(0);
+            }
+            usings = usings.AddRange(newUsingListString.Select(u => u.ToUsing()));
+
+            return node.WithUsings(usings);
+        }
 
         public static UsingDirectiveSyntax ToUsing(this string @namespace)
         {

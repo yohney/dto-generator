@@ -30,7 +30,7 @@ namespace DtoGenerator.Logic.Infrastructure
 
             if (existingDto == null)
             {
-                var rawTree = BuildOutline(dtoNamespace, entity);
+                var rawTree = BuildOutline(dtoNamespace, entity, generatorProperties.StyleCop);
 
                 var commentAppender = new EmptyTreeCommentAppender();
                 root = commentAppender.Visit(rawTree.GetRoot()) as CompilationUnitSyntax;
@@ -49,14 +49,33 @@ namespace DtoGenerator.Logic.Infrastructure
                 root = customCodePreserver.Visit(existingRoot) as CompilationUnitSyntax;
             }
 
-            if(generatorProperties.GenerateMapper)
-                root = root.AppendUsing(mapperNamespace, entity.Namespace);
+            if (generatorProperties.StyleCop)
+            {
+                var nameSpaceNode = EntityParser.GetNamespaceNode(root);
 
-            if (generatorProperties.AddDataContract)
-                root = root.AppendUsing("System.Runtime.Serialization");
+                if (generatorProperties.GenerateMapper)
+                    nameSpaceNode = nameSpaceNode.AppendUsing(mapperNamespace, entity.Namespace);
 
-            if (generatorProperties.AddDataAnnotations)
-                root = root.AppendUsing("System.ComponentModel.DataAnnotations");
+                if (generatorProperties.AddDataContract)
+                    nameSpaceNode = nameSpaceNode.AppendUsing("System.Runtime.Serialization");
+
+                if (generatorProperties.AddDataAnnotations)
+                    nameSpaceNode = nameSpaceNode.AppendUsing("System.ComponentModel.DataAnnotations");
+
+                root = root.ReplaceNode(EntityParser.GetNamespaceNode(root), nameSpaceNode);
+            }
+            else
+            {
+
+                if (generatorProperties.GenerateMapper)
+                    root = root.AppendUsing(mapperNamespace, entity.Namespace);
+
+                if (generatorProperties.AddDataContract)
+                    root = root.AppendUsing("System.Runtime.Serialization");
+
+                if (generatorProperties.AddDataAnnotations)
+                    root = root.AppendUsing("System.ComponentModel.DataAnnotations");
+            }
 
             var generatedPropertiesAppender = new GeneratedPropertiesAppender(entity, generatorProperties);
             root = generatedPropertiesAppender.Visit(root) as CompilationUnitSyntax;
@@ -88,9 +107,9 @@ namespace DtoGenerator.Logic.Infrastructure
             }
         }
 
-        private static SyntaxTree BuildOutline(string dtoNamespace, EntityMetadata entity)
+        private static SyntaxTree BuildOutline(string dtoNamespace, EntityMetadata entity, bool StyleCop)
         {
-            using (var stream = typeof(DtoBuilder).Assembly.GetManifestResourceStream($"DtoGenerator.Logic.Infrastructure.Template.Outline.cs"))
+            using (var stream = typeof(DtoBuilder).Assembly.GetManifestResourceStream($"DtoGenerator.Logic.Infrastructure.Template.Outline" + (StyleCop? "StyleCop.cs": ".cs")))
             {
                 using (var reader = new StreamReader(stream))
                 {

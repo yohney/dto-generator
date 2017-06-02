@@ -118,7 +118,17 @@ namespace DtoGenerator.Logic.Infrastructure
 
             return properties.Any(p => p.AttributeLists.Any(a => a.Attributes.Any(att => _attributDataAnnotationToPreserve.Contains(att.Name.ToString()))));
         }
+        public static async Task<bool> HasStyleCop(Document existingDto)
+        {
+            if (existingDto == null)
+                return false;
 
+            var existingRoot = await existingDto.GetSyntaxRootAsync();
+            if (existingRoot.ToString().Contains("#pragma warning disable CS1591"))
+                return true;
+
+            return false;
+        }
         public static async Task<bool> HasDataContract(Document existingDto)
         {
             if (existingDto == null)
@@ -263,10 +273,7 @@ namespace DtoGenerator.Logic.Infrastructure
                 throw new ArgumentException("Source code to parse must contain exactly one class declaration!");
             }
 
-            var namespaceNode = root
-                .DescendantNodes(p => !(p is NamespaceDeclarationSyntax))
-                .OfType<NamespaceDeclarationSyntax>()
-                .FirstOrDefault();
+            var namespaceNode = GetNamespaceNode(root);
 
             var classNode = classNodes
                 .Single();
@@ -305,6 +312,14 @@ namespace DtoGenerator.Logic.Infrastructure
                 .ToList();
 
             return result;
+        }
+
+        public static NamespaceDeclarationSyntax GetNamespaceNode(SyntaxNode root)
+        {
+            return root
+                            .DescendantNodes(p => !(p is NamespaceDeclarationSyntax))
+                            .OfType<NamespaceDeclarationSyntax>()
+                            .FirstOrDefault();
         }
 
         private static List<AttributeListSyntax> GetFilteredAttributeList(SyntaxList<AttributeListSyntax> attributeGroups, List<string> attributesToPreserve)
