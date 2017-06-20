@@ -320,7 +320,10 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                         {
                             if (this._generatorProperties.MapEntitiesById)
                             {
-                                var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public ICollection<int> " + identifier + "Ids { get { return " + identifier + "?.Select(s => s.Id).ToList(); } set { " + identifier + " = value.Select(v => new " + relatedType + "() { Id = v }).ToList(); } }");
+                                var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public ICollection<int> " + identifier + @"Ids
+        {
+            get { return " + identifier + "?.Select(s => s.Id).ToList(); } set { " + identifier + " = value.Select(v => new " + relatedType + @"() { Id = v }).ToList();
+        }");
                                 yield return AddAttributes(prop, resultId);
                             }
                             type = relatedType.ToCollectionType("ICollection");
@@ -335,13 +338,19 @@ namespace DtoGenerator.Logic.Infrastructure.TreeProcessing
                             {
                                 if (!prop.AttributesList.Any(a => a.Attributes.Any(a2 => a2.Name.ToString() == "Required")))
                                 {
-                                    var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public Nullable<int> " + identifier + "Id { get { return " + identifier + "?.Id; } set { " + identifier + " = (value == null) ? null : new " + relatedType + "() { Id = value.Value }; } }");
+                                    var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public int? " + identifier + @"Id
+        {
+            get { return " + identifier + "?.Id; } set { " + identifier + " = (value == null) ? null : new " + relatedType + @"() { Id = value.Value }; }
+        }");
                                     yield return AddAttributes(prop, resultId);
 
                                 }
                                 else
                                 {
-                                    var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public int " + identifier + "Id { get { return " + identifier + " != null ? " + identifier + ".Id : 0; } set { " + identifier + " = new " + relatedType + "() { Id = value }; } }");
+                                    var resultId = SyntaxExtenders.GeneratePropertyDeclarationFromString("public int " + identifier + @"Id
+        {
+            get { return " + identifier + " != null ? " + identifier + ".Id : 0; } set { " + identifier + " = new " + relatedType + @"() { Id = value }; }
+        }");
                                     yield return AddAttributes(prop, resultId);
                                 }
                             }

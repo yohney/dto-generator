@@ -119,6 +119,10 @@ namespace Microsoft.CodeAnalysis
             {
                 var root = syntaxTree.GetRoot();
                 root = Formatter.Format(root, solution.Workspace);
+                if (generatorProperties.StyleCop)
+                {
+
+                }
 
                 var newDoc = existingDtoDocument.WithSyntaxRoot(root);
                 return newDoc.Project.Solution;
