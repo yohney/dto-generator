@@ -1,25 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Metadata>
-    <Identity Id="DtoGenerator.Vsix.Ivan Cesar.fc3ee012-1f8f-496f-933e-08139824c3be" Version="1.8.9" Language="en-US" Publisher="Ivan Cesar" />
-    <DisplayName>DTO Generator</DisplayName>
-    <Description xml:space="preserve">This simple tool uses Roslyn API to find out about the code, and reads entity properties and generates corresponding DTO object, with mapper class attached.</Description>
-    <MoreInfo>https://github.com/yohney/dto-generator</MoreInfo>
-    <License>License.txt</License>
-    <ReleaseNotes>release-notes.html</ReleaseNotes>
-    <Tags>DTO generator</Tags>
-  </Metadata>
-  <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[14.0, 16.0)" />
-  </Installation>
-  <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
-    <Dependency Id="Microsoft.VisualStudio.MPF.14.0" DisplayName="Visual Studio MPF 14.0" d:Source="Installed" Version="[14.0]" />
-  </Dependencies>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-  </Assets>
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0.25904.2,16.0)" DisplayName="Visual Studio core editor" />
-  </Prerequisites>
+    <Metadata>
+        <Identity Id="DtoGenerator.Vsix.Ivan Cesar.fc3ee012-1f8f-496f-933e-08139824c3be" Version="1.8.11" Language="en-US" Publisher="Ivan Cesar &amp; Gwenael Fillon" />
+        <DisplayName>DTO Generator</DisplayName>
+        <Description xml:space="preserve">This simple tool uses Roslyn API to find out about the code, and reads entity properties and generates corresponding DTO object, with mapper class attached.</Description>
+        <MoreInfo>https://github.com/yohney/dto-generator</MoreInfo>
+        <License>License.txt</License>
+        <ReleaseNotes>release-notes.html</ReleaseNotes>
+        <Tags>DTO generator</Tags>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[14.0, 16.0)" />
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+        <Dependency Id="Microsoft.VisualStudio.MPF.14.0" DisplayName="Visual Studio MPF 14.0" d:Source="Installed" Version="[14.0]" />
+    </Dependencies>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    </Assets>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0.25904.2,16.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
 </PackageManifest>

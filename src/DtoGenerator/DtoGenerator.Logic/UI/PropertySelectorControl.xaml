@@ -4,12 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DtoGenerator.Logic.UI"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="500">
+             mc:Ignorable="d" Height="566" Width="837">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
-    <Grid Background="White">
+    <Grid Background="White" Margin="0,0,3,1">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
@@ -20,8 +19,9 @@
             <RowDefinition Height="31"/>
             <RowDefinition Height="31"/>
             <RowDefinition Height="31"/>
-            <RowDefinition Height="178*"/>
             <RowDefinition Height="30"/>
+            <RowDefinition Height="178*"/>
+
         </Grid.RowDefinitions>
         <DockPanel LastChildFill="True" Grid.Row="1">
             <Label Content="{Binding EntityModel.EntityName}"/>
@@ -39,6 +39,7 @@
         </DockPanel >
         <DockPanel LastChildFill="True" Grid.Row="4" >
             <CheckBox Margin="5,0" IsChecked="{Binding GenerateMapper}" Content="Generate mapper class" VerticalAlignment="Center" />
+            <CheckBox Margin="5,8" IsChecked="{Binding UseBIANetMapperInfra}" Content="User BIA.Net mapper infrastructure" VerticalAlignment="Center" />
             <CheckBox Margin="5,0" IsChecked="{Binding AddDataContract}" Content="Use DataContract attributes" VerticalAlignment="Center" />
             <CheckBox Margin="5,0" IsChecked="{Binding AddDataAnnotations}" Content="Preserve DataAnnotation" VerticalAlignment="Center" />
         </DockPanel >
@@ -47,19 +48,21 @@
             <CheckBox Margin="5,0" IsChecked="{Binding MapEntitiesById}" Content="Map related entities by id" VerticalAlignment="Center" />
             <CheckBox Margin="5,0" IsChecked="{Binding StyleCop}" Content="StyleCop Compatibility" VerticalAlignment="Center" />
         </DockPanel >
-        <TreeView HorizontalAlignment="Stretch"  Margin="5" Grid.Row="6" VerticalAlignment="Stretch" ItemsSource="{Binding EntityModel.Properties}" >
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding RelatedEntity.Properties}" DataType="{x:Type local:PropertyViewModel}">
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsEnabled}" Focusable="True" />
-                        <TextBlock Text="{Binding NameFormatted}" Focusable="False" Foreground="{Binding TextColor}" />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
-        <StackPanel HorizontalAlignment="Right" Grid.Row="7" VerticalAlignment="Stretch" Orientation="Horizontal" Width="220">
+        <DockPanel HorizontalAlignment="Right" Grid.Row="6">
             <Button Width="100" Content="Cancel" Margin="5,0,5,5" Click="Cancel_Click" />
             <Button Width="100" Content="OK" Margin="5,0,5,5" Click="Ok_Click" />
-        </StackPanel>
+        </DockPanel>
+        <DockPanel Grid.Row="7">
+            <TreeView HorizontalAlignment="Stretch"  Margin="5,5,5,10" VerticalAlignment="Stretch" ItemsSource="{Binding EntityModel.Properties}" >
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding RelatedEntity.Properties}" DataType="{x:Type local:PropertyViewModel}">
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsEnabled}" Focusable="True" />
+                            <TextBlock Text="{Binding NameFormatted}" Focusable="False" Foreground="{Binding TextColor}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </DockPanel>
     </Grid>
 </UserControl>

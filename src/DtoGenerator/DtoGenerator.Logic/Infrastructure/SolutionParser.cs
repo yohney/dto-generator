@@ -89,21 +89,24 @@ namespace Microsoft.CodeAnalysis
             var dtoNamespace = dtoLocation.ToNamespace(project.AssemblyName);
             var mapperNamespace = "unknown";
 
-            var mapperDoc = compilation.GetDocumentForSymbol(project.Solution, "MapperBase");
-            if(mapperDoc == null && generatorProperties.GenerateMapper)
+            if (!generatorProperties.UseBIANetMapperInfra)
             {
-                var mapperFolderStructure = dtoLocation.GetFolders().Concat(new[] { "Infrastructure" });
-                mapperNamespace = dtoNamespace + ".Infrastructure";
+                var mapperDoc = compilation.GetDocumentForSymbol(project.Solution, "MapperBase");
+                if (mapperDoc == null && generatorProperties.GenerateMapper)
+                {
+                    var mapperFolderStructure = dtoLocation.GetFolders().Concat(new[] { "Infrastructure" });
+                    mapperNamespace = dtoNamespace + ".Infrastructure";
 
-                project = project.AddDocument("MapperBase.cs", DtoBuilder.BuildMapper(mapperNamespace), folders: mapperFolderStructure).Project;
-            }
-            else if(generatorProperties.GenerateMapper)
-            {
-                var mapperSyntax = await mapperDoc.GetSyntaxRootAsync();
-                mapperNamespace = mapperSyntax.DescendantNodesAndSelf(p => !p.IsKind(CSharp.SyntaxKind.NamespaceDeclaration))
-                    .OfType<NamespaceDeclarationSyntax>()
-                    .Select(p => p.Name.ToString())
-                    .FirstOrDefault();
+                    project = project.AddDocument("MapperBase.cs", DtoBuilder.BuildMapper(mapperNamespace), folders: mapperFolderStructure).Project;
+                }
+                else if (generatorProperties.GenerateMapper)
+                {
+                    var mapperSyntax = await mapperDoc.GetSyntaxRootAsync();
+                    mapperNamespace = mapperSyntax.DescendantNodesAndSelf(p => !p.IsKind(CSharp.SyntaxKind.NamespaceDeclaration))
+                        .OfType<NamespaceDeclarationSyntax>()
+                        .Select(p => p.Name.ToString())
+                        .FirstOrDefault();
+                }
             }
 
             var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: dtoNamespace, existingDto: existingSyntaxTree, mapperNamespace: mapperNamespace, generatorProperties: generatorProperties);

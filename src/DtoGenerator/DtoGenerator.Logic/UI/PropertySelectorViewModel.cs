@@ -25,7 +25,11 @@ namespace DtoGenerator.Logic.UI
             var instance = new PropertySelectorViewModel();
             instance._doc = doc;
             //do not use instance.RelatedEntiesByObject here
-            instance._selectedGeneratorProperties.RelatedEntiesByObject = await EntityParser.HasEntities(existingDto);
+            if (existingDto != null)
+            {
+                instance._selectedGeneratorProperties.RelatedEntiesByObject = await EntityParser.HasEntities(doc, existingDto, instance.RelatedEntiesByObject);
+            }
+
             if (instance.RelatedEntiesByObject)
             {
                 var relatedMappedPoperties = await EntityParser.GetRelatedMappedPoperties(existingDto);
@@ -39,12 +43,16 @@ namespace DtoGenerator.Logic.UI
             var isDerived = await EntityParser.HasBaseDto(existingDto, instance.EntityModel.BaseEntityDtoName);
             instance.EntityModel.ReuseBaseEntityMapper |= isDerived;
 
-            instance.AddDataContract = await EntityParser.HasDataContract(existingDto);
-            instance.AddDataAnnotations = await EntityParser.HasDataAnnotations(existingDto);
-            instance.StyleCop = await EntityParser.HasStyleCop(existingDto);
-
-            if (instance.RelatedEntiesByObject)
-                instance.MapEntitiesById = await EntityParser.HasMapEntitiesById(existingDto);
+            if (existingDto != null)
+            {
+                instance.AddDataContract = await EntityParser.HasDataContract(existingDto);
+                instance.AddDataAnnotations = await EntityParser.HasDataAnnotations(existingDto);
+                instance.StyleCop = await EntityParser.HasStyleCop(existingDto);
+                if (instance.RelatedEntiesByObject)
+                    instance.MapEntitiesById = await EntityParser.HasMapEntitiesById(existingDto, instance.MapEntitiesById);
+                else
+                    instance.MapEntitiesById = false;
+            }
 
             return instance;
         }
@@ -57,6 +65,7 @@ namespace DtoGenerator.Logic.UI
         public class GeneratorProperties
         {
             public bool GenerateMapper { get; set; }
+            public bool UseBIANetMapperInfra { get; set; }
             public bool AddDataContract { get; set; }
             public bool AddDataAnnotations { get; set; }
             public bool RelatedEntiesByObject { get; set; }
@@ -64,7 +73,7 @@ namespace DtoGenerator.Logic.UI
             public bool StyleCop { get; set; }
             public GeneratorProperties()
             {
-                GenerateMapper = true; AddDataAnnotations = false; AddDataContract = false; MapEntitiesById = false; RelatedEntiesByObject = false; StyleCop = false;
+                GenerateMapper = true; UseBIANetMapperInfra = true;  AddDataAnnotations = true; AddDataContract = false; MapEntitiesById = true; RelatedEntiesByObject = true; StyleCop = true;
             }
         }
 
@@ -90,6 +99,21 @@ namespace DtoGenerator.Logic.UI
             }
         }
 
+        public bool UseBIANetMapperInfra
+        {
+            get
+            {
+                return this._selectedGeneratorProperties.UseBIANetMapperInfra;
+            }
+            set
+            {
+                if (value != this._selectedGeneratorProperties.UseBIANetMapperInfra)
+                {
+                    this._selectedGeneratorProperties.UseBIANetMapperInfra = value;
+                    this.InvokePropertyChanged(nameof(UseBIANetMapperInfra));
+                }
+            }
+        }
         public bool AddDataContract
         {
             get
@@ -350,7 +374,17 @@ namespace DtoGenerator.Logic.UI
                 instance.BaseEntityDtoName = instance._originalMetadata.BaseClassDtoName;
 
                 if (existingProperties == null)
-                    instance.ReuseBaseEntityMapper = true;
+                {
+                    if (instance.BaseEntityDtoName != "ObjectRemapDTO")
+                    {
+                        instance.ReuseBaseEntityMapper = true;
+                    }
+                    else
+                    {
+                        instance.ReuseBaseEntityMapper = false;
+                    }
+                }
+                    
             }
 
             return instance;

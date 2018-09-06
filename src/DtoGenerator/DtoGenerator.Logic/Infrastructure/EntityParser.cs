@@ -138,10 +138,10 @@ namespace DtoGenerator.Logic.Infrastructure
 
             return existingRoot.ToString().Contains("[DataContract]");
         }
-        public static async Task<bool> HasEntities(Document existingDto)
+        public static async Task<bool> HasEntities(Document doc, Document existingDto, bool defaultValue)
         {
             if (existingDto == null)
-                return false;
+                return defaultValue;
 
             var existingRoot = await existingDto.GetSyntaxRootAsync();
 
@@ -149,18 +149,35 @@ namespace DtoGenerator.Logic.Infrastructure
             var classNode = classNodes.First();
             var properties = GetProperties(classNode);
 
-            bool result = properties.Any(p => (p.Type.ToString().Length > 3 && p.Type.ToString().Substring(p.Type.ToString().Length - 3, 3) == "DTO")
-            ||(p.Type.ToString().Length > 14 && p.Type.ToString().Substring(0, 11) == "ICollection" && p.Type.ToString().Substring(p.Type.ToString().Length - 4, 3) == "DTO")
-            );
+            if(defaultValue==true)
+            {
+                EntityMetadata originalMetadata = await EntityParser.FromDocument(doc, includeInherited: true);
 
-            return result;
+                foreach (PropertyMetadata prop in originalMetadata.Properties)
+                {
+                    if (prop.IsRelation)
+                    {
+                        if (properties.Any(p => p.Identifier.Text.Length > prop.Name.Length && p.Identifier.Text.Substring(0, prop.Name.Length) == prop.Name) && !(properties.Any(p => (p.Identifier.Text == prop.Name) && (p.Type.ToString().Length > 3 && p.Type.ToString().Substring(p.Type.ToString().Length - 3, 3) == "DTO"))))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            else
+            {
+                return properties.Any(p => (p.Type.ToString().Length > 3 && p.Type.ToString().Substring(p.Type.ToString().Length - 3, 3) == "DTO")
+                || (p.Type.ToString().Length > 14 && p.Type.ToString().Substring(0, 11) == "ICollection" && p.Type.ToString().Substring(p.Type.ToString().Length - 4, 3) == "DTO")
+                );
+            }
         }
 
 
-        public static async Task<bool> HasMapEntitiesById(Document existingDto)
+        public static async Task<bool> HasMapEntitiesById(Document existingDto, bool defaultValue)
         {
             if (existingDto == null)
-                return false;
+                return defaultValue;
 
             var existingRoot = await existingDto.GetSyntaxRootAsync();
 
@@ -168,11 +185,16 @@ namespace DtoGenerator.Logic.Infrastructure
             var classNode = classNodes.First();
             var properties = GetProperties(classNode);
 
-            var propname = properties.Select(p => p.Identifier.ToString());
+            if (properties.Any(p => (p.Type.ToString().Length > 3 && p.Type.ToString().Substring(p.Type.ToString().Length - 3, 3) == "DTO")
+                || (p.Type.ToString().Length > 14 && p.Type.ToString().Substring(0, 11) == "ICollection" && p.Type.ToString().Substring(p.Type.ToString().Length - 4, 3) == "DTO")
+                ))
+            {
+                var propname = properties.Select(p => p.Identifier.ToString());
 
-            bool result = propname.Any(p => propname.Contains(p+"Id") || propname.Contains(p + "Ids"));
+                return propname.Any(p => propname.Contains(p + "Id") || propname.Contains(p + "Ids"));
+            }
 
-            return result;
+            return defaultValue;
         }
 
 

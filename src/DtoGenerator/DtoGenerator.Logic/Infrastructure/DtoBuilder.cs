@@ -54,7 +54,17 @@ namespace DtoGenerator.Logic.Infrastructure
                 var nameSpaceNode = EntityParser.GetNamespaceNode(root);
 
                 if (generatorProperties.GenerateMapper)
-                    nameSpaceNode = nameSpaceNode.AppendUsing(mapperNamespace, entity.Namespace);
+                {
+                    if (!generatorProperties.UseBIANetMapperInfra)
+                    {
+                        nameSpaceNode = nameSpaceNode.AppendUsing(mapperNamespace, entity.Namespace);
+                    }
+                    else
+                    {
+                        nameSpaceNode = nameSpaceNode.AppendUsing("BIA.Net.Business.DTO.Infrastructure");
+                    }
+                    nameSpaceNode = nameSpaceNode.AppendUsing("Model");
+                }
 
                 if (generatorProperties.AddDataContract)
                     nameSpaceNode = nameSpaceNode.AppendUsing("System.Runtime.Serialization");
