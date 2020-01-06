@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static DtoGenerator.Logic.UI.PropertySelectorViewModel;
 
 namespace DtoGenerator.Tests
 {
@@ -58,7 +59,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties());
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -95,7 +96,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { GenerateMapper = false});
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -130,7 +131,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "PersonDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() );
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -182,7 +183,7 @@ namespace DtoGenerator.Tests
 
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() );
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -233,7 +234,7 @@ namespace DtoGenerator.Tests
             Assert.IsTrue(countryProp.RelatedEntity.Properties.Where(p => p.Name == "Code").Any(p => p.IsSelected));
             Assert.IsFalse(countryProp.RelatedEntity.Properties.Where(p => p.Name == "Name").Any(p => p.IsSelected));
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.EntityModel, new GeneratorProperties());
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -266,7 +267,7 @@ namespace DtoGenerator.Tests
             var dtoLocation = solution.GetMostLikelyDtoLocation();
             var vm = await PropertySelectorViewModel.Create(personClassDoc, "PersonCustomDTO", dtoLocation);
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.GetMetadata(), true, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.EntityModel, new GeneratorProperties());
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -326,7 +327,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, true, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { AddDataContract = true });
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -362,7 +363,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), false, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties() { GenerateMapper = false });
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -397,7 +398,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "FishDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties());
             Assert.IsNotNull(modifiedSolution);
 
             var changeSet = modifiedSolution.GetChanges(solution);
@@ -439,7 +440,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "CityDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties());
             Assert.IsNotNull(modifiedSolution);
 
             var cityDto = modifiedSolution.GetChanges(solution)
@@ -473,7 +474,7 @@ namespace DtoGenerator.Tests
             vm.DtoName = "ComputerDTO";
             var dtoLocation = solution.GetMostLikelyDtoLocation();
 
-            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.ConvertToMetadata(), true, false, false);
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm, new GeneratorProperties());
             Assert.IsNotNull(modifiedSolution);
 
             var computerDto = modifiedSolution.GetChanges(solution)
@@ -505,6 +506,45 @@ namespace DtoGenerator.Tests
 
             Assert.IsTrue(sourceCode.IndexOf("var x = 0;") > sourceCode.IndexOf("////BCC/ BEGIN CUSTOM CODE SECTION"));
             Assert.IsTrue(sourceCode.IndexOf("model.Cpus = x;") < sourceCode.IndexOf("////ECC/ END CUSTOM CODE SECTION"));
+        }
+
+        [TestMethod]
+        public async Task WriteDto_ExistingSolution_SampleTable1Rewrite()
+        {
+            var msWorkspace = MSBuildWorkspace.Create();
+            var solution = msWorkspace.OpenSolutionAsync(this.TestSolution.FullName).Result;
+            solution = solution.GetIsolatedSolution();
+
+            var sampleTable1Doc = solution.Projects
+                .SelectMany(p => p.Documents)
+                .Where(p => p.Name == "SampleTable1.cs")
+                .FirstOrDefault();
+
+            var existingDto = solution.Projects
+                .SelectMany(p => p.Documents)
+                .Where(p => p.Name == "SampleTable1DTO.cs")
+                .FirstOrDefault();
+
+            var dtoLocation = solution.GetMostLikelyDtoLocation();
+            var vm = await PropertySelectorViewModel.Create(sampleTable1Doc, "SampleTable1DTO", dtoLocation, existingDto);
+
+            var modifiedSolution = await solution.WriteDto(dtoLocation, vm.EntityModel, new GeneratorProperties() { AddDataAnnotations=true, RelatedEntiesByObject=true, MapEntitiesById =true });
+            Assert.IsNotNull(modifiedSolution);
+
+            var sampleTable1DTO = modifiedSolution.GetChanges(solution)
+                .GetProjectChanges().Single()
+                .GetChangedDocuments()
+                .Select(p => modifiedSolution.GetProject(p.ProjectId).GetDocument(p))
+                .Where(p => p.Name == "SampleTable1DTO.cs")
+                .FirstOrDefault();
+
+            Assert.IsNotNull(sampleTable1DTO);
+
+            var source = await sampleTable1DTO.GetTextAsync();
+            var sourceCode = source.ToString();
+
+            Assert.AreEqual(4, Regex.Matches(sourceCode, CustomCodePreserver.CustomCodeCommentBegin).Count);
+            Assert.AreEqual(4, Regex.Matches(sourceCode, CustomCodePreserver.CustomCodeCommentEnd).Count);
         }
     }
 }

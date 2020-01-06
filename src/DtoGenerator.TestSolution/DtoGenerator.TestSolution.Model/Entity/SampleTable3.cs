@@ -7,38 +7,36 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DtoGenerator.Tests.CodeSamples
+namespace Safran.ProjectName1.Model
 {
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.Collections.Generic;
     
-    public partial class SampleTable1 
+    public partial class SampleTable3
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public SampleTable1()
+        public SampleTable3()
         {
-            this.SampleTable3 = new HashSet<SampleTable3>();
+            this.SampleTable1 = new HashSet<SampleTable1>();
         }
     
     
         [Required]
         public int Id { get; set; }
     
-        [StringLength(10)]
+        [StringLength(50)]
         [Required]
         public string Title { get; set; }
     
-        [StringLength(200),Required]
+        [StringLength(200)]
+        [Required]
         public string Description { get; set; }
     
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
-        public Nullable<System.DateTime> Date { get; set; }
-
         [Required]
-        public virtual SampleTable2 SampleTable2 { get; set; }
-        public virtual SampleTable2 SampleTable2_0_1 { get; set; }
+        public short Value { get; set; }
+    
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<SampleTable3> SampleTable3 { get; set; }
+        public virtual ICollection<SampleTable1> SampleTable1 { get; set; }
     }
 }

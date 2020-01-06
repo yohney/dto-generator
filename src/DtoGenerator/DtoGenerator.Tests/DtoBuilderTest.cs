@@ -5,6 +5,7 @@ using DtoGenerator.Tests.CodeSamples;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static DtoGenerator.Logic.UI.PropertySelectorViewModel;
 
 namespace DtoGenerator.Tests
 {
@@ -147,7 +148,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable1DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace",addDataAnnotations:true);
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties:new GeneratorProperties() { AddDataAnnotations=true});
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
@@ -166,7 +167,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable3DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", addDataAnnotations: true);
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties:new GeneratorProperties() { AddDataAnnotations=true});
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
@@ -180,7 +181,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable2DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", addDataAnnotations: false);
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { AddDataAnnotations = false });
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
@@ -199,7 +200,7 @@ namespace DtoGenerator.Tests
             var metadata = EntityParser.FromString(code);
             metadata.DtoName = "SampleTable2DTO";
 
-            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", addContractAttrs: true, addDataAnnotations: true);
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { AddDataContract=true, AddDataAnnotations = true });
             Assert.IsNotNull(tree);
 
             var codeText = tree.ToString();
@@ -209,6 +210,36 @@ namespace DtoGenerator.Tests
             Assert.IsTrue(codeText.Contains("[DataContract]"));
             Assert.IsTrue(codeText.Contains("[DataMember]"));
             Assert.IsTrue(codeText.Contains("using System.Runtime.Serialization;"));
+        }
+
+        [TestMethod]
+        public void DtoBuilder_EntityWithBase_Entities_And_Id()
+        {
+            var code = SampleCodeProvider.SampleTable1;
+            var metadata = EntityParser.FromString(code);
+            metadata.DtoName = "SampleTable1DTO";
+
+            var tree = DtoBuilder.BuildDto(metadata, dtoNamespace: "Some.Namespace", generatorProperties: new GeneratorProperties() { AddDataAnnotations = true, RelatedEntiesByObject=true, MapEntitiesById=true });
+            Assert.IsNotNull(tree);
+
+            var codeText = tree.ToString();
+
+
+            Assert.IsTrue(codeText.Contains("public int SampleTable2Id { get { return SampleTable2 != null ? SampleTable2.Id : 0; } set { SampleTable2 = new SampleTable2DTO() { Id = value }; } }"));
+            Assert.IsTrue(codeText.Contains("public SampleTable2DTO SampleTable2 { get; set; }"));
+            Assert.IsTrue(codeText.Contains("public ICollection<int> SampleTable3Ids { get { return SampleTable3?.Select(s => s.Id).ToList(); } set { SampleTable3 = value.Select(v => new SampleTable3DTO() { Id = v }).ToList(); } }"));
+            Assert.IsTrue(codeText.Contains("public ICollection<SampleTable3DTO> SampleTable3 { get; set; }"));
+            Assert.IsTrue(codeText.Contains("public Nullable<int> SampleTable2_0_1Id { get { return SampleTable2_0_1?.Id; } set { SampleTable2_0_1 = (value == null) ? null : new SampleTable2DTO() { Id = value.Value }; } }"));
+            Assert.IsTrue(codeText.Contains("public SampleTable2DTO SampleTable2_0_1 { get; set; }"));
+            /*
+            Assert.IsTrue(codeText.Contains("SampleTable2 = (p.SampleTable2 == null) ? null : new SampleTable2DTO() { Id = p.SampleTable2.Id, Title = p.SampleTable2.Title, Description = p.SampleTable2.Description, },"));
+            Assert.IsTrue(codeText.Contains("SampleTable3 = p.SampleTable3.Select(s => new SampleTable3DTO() { Id = s.Id, Title = s.Title, Description = s.Description, Value = s.Value, }).ToList(),"));
+            Assert.IsTrue(codeText.Contains("SampleTable2_0_1 = (p.SampleTable2_0_1 == null) ? null : new SampleTable2DTO() { Id = p.SampleTable2_0_1.Id, Title = p.SampleTable2_0_1.Title, Description = p.SampleTable2_0_1.Description, }"));
+
+            Assert.IsTrue(codeText.Contains("model.SampleTable2 = (dto.SampleTable2 == null) ? null : new SampleTable2() { Id = dto.SampleTable2.Id, Title = dto.SampleTable2.Title, Description = dto.SampleTable2.Description, };"));
+            Assert.IsTrue(codeText.Contains("model.SampleTable3 = (dto.SampleTable3 == null) ? null : dto.SampleTable3.Select(s => new SampleTable3() { Id = s.Id, Title = s.Title, Description = s.Description, Value = s.Value, }).ToList();"));
+            Assert.IsTrue(codeText.Contains("model.SampleTable2_0_1 = (dto.SampleTable2_0_1 == null) ? null : new SampleTable2() { Id = dto.SampleTable2_0_1.Id, Title = dto.SampleTable2_0_1.Title, Description = dto.SampleTable2_0_1.Description, };"));
+            */
         }
     }
 }

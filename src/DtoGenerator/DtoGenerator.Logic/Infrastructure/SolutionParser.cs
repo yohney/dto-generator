@@ -9,6 +9,7 @@ using DtoGenerator.Logic.UI;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
+using static DtoGenerator.Logic.UI.PropertySelectorViewModel;
 
 namespace Microsoft.CodeAnalysis
 {
@@ -68,8 +69,11 @@ namespace Microsoft.CodeAnalysis
         /// <param name="dtoLocation"></param>
         /// <param name="metadata"></param>
         /// <returns>Modified solution containing changes to apply to workspace</returns>
-        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityMetadata metadata, bool generateMapper, bool addContractAttrs, bool addDataAnnotations)
+        public static async Task<Solution> WriteDto(this Solution solution, SolutionLocation dtoLocation, EntityViewModel vm, GeneratorProperties generatorProperties)
         {
+            EntityMetadata metadata = null;
+            if (vm != null) metadata = vm.ConvertToMetadata(generatorProperties);
+
             var project = solution.Projects
                 .Where(p => p.Name.Contains(dtoLocation.Project))
                 .OrderBy(p => p.Name) // Due to .NET core project which have more complex project name, cannot use ==
@@ -85,24 +89,27 @@ namespace Microsoft.CodeAnalysis
             var dtoNamespace = dtoLocation.ToNamespace(project.AssemblyName);
             var mapperNamespace = "unknown";
 
-            var mapperDoc = compilation.GetDocumentForSymbol(project.Solution, "MapperBase");
-            if(mapperDoc == null && generateMapper)
+            if (!generatorProperties.UseBIANetMapperInfra)
             {
-                var mapperFolderStructure = dtoLocation.GetFolders().Concat(new[] { "Infrastructure" });
-                mapperNamespace = dtoNamespace + ".Infrastructure";
+                var mapperDoc = compilation.GetDocumentForSymbol(project.Solution, "MapperBase");
+                if (mapperDoc == null && generatorProperties.GenerateMapper)
+                {
+                    var mapperFolderStructure = dtoLocation.GetFolders().Concat(new[] { "Infrastructure" });
+                    mapperNamespace = dtoNamespace + ".Infrastructure";
 
-                project = project.AddDocument("MapperBase.cs", DtoBuilder.BuildMapper(mapperNamespace), folders: mapperFolderStructure).Project;
-            }
-            else if(generateMapper)
-            {
-                var mapperSyntax = await mapperDoc.GetSyntaxRootAsync();
-                mapperNamespace = mapperSyntax.DescendantNodesAndSelf(p => !p.IsKind(CSharp.SyntaxKind.NamespaceDeclaration))
-                    .OfType<NamespaceDeclarationSyntax>()
-                    .Select(p => p.Name.ToString())
-                    .FirstOrDefault();
+                    project = project.AddDocument("MapperBase.cs", DtoBuilder.BuildMapper(mapperNamespace), folders: mapperFolderStructure).Project;
+                }
+                else if (generatorProperties.GenerateMapper)
+                {
+                    var mapperSyntax = await mapperDoc.GetSyntaxRootAsync();
+                    mapperNamespace = mapperSyntax.DescendantNodesAndSelf(p => !p.IsKind(CSharp.SyntaxKind.NamespaceDeclaration))
+                        .OfType<NamespaceDeclarationSyntax>()
+                        .Select(p => p.Name.ToString())
+                        .FirstOrDefault();
+                }
             }
 
-            var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: dtoNamespace, existingDto: existingSyntaxTree, mapperNamespace: mapperNamespace, generateMapper: generateMapper, addContractAttrs: addContractAttrs, addDataAnnotations: addDataAnnotations);
+            var syntaxTree = DtoBuilder.BuildDto(metadata, dtoNamespace: dtoNamespace, existingDto: existingSyntaxTree, mapperNamespace: mapperNamespace, generatorProperties: generatorProperties);
 
             if (existingDtoDocument == null)
             {
@@ -115,6 +122,10 @@ namespace Microsoft.CodeAnalysis
             {
                 var root = syntaxTree.GetRoot();
                 root = Formatter.Format(root, solution.Workspace);
+                if (generatorProperties.StyleCop)
+                {
+
+                }
 
                 var newDoc = existingDtoDocument.WithSyntaxRoot(root);
                 return newDoc.Project.Solution;

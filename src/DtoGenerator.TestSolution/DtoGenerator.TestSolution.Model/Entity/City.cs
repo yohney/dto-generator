@@ -9,6 +9,8 @@ namespace DtoGenerator.TestSolution.Model.Entity
 {
     public class City : EntityBase
     {
+        public Guid UniqueId { get; set; }
+        public DateTime DateCreated { get; set; }
         public string PostalCode { get; set; }
 
         public string Name { get; set; }

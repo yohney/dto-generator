@@ -58,6 +58,31 @@ namespace DtoGenerator.Logic.Infrastructure
 
             return node.WithUsings(usings);
         }
+        public static NamespaceDeclarationSyntax AppendUsing(this NamespaceDeclarationSyntax node, params string[] usingDirectives)
+        {
+            var newUsingListString = node.DescendantNodes(p => !(p is ClassDeclarationSyntax))
+                .OfType<UsingDirectiveSyntax>()
+                .Select(p => p.Name.ToString())
+                .ToList();
+
+            foreach (var x in usingDirectives)
+            {
+                if (x == null || newUsingListString.Contains(x))
+                    continue;
+
+                newUsingListString.Add(x);
+            }
+            newUsingListString.Sort();
+
+            var usings = node.Usings;
+            while (usings.Count > 0)
+            {
+                usings = usings.RemoveAt(0);
+            }
+            usings = usings.AddRange(newUsingListString.Select(u => u.ToUsing()));
+
+            return node.WithUsings(usings);
+        }
 
         public static UsingDirectiveSyntax ToUsing(this string @namespace)
         {
@@ -201,6 +226,7 @@ namespace DtoGenerator.Logic.Infrastructure
                 .AppendNewLine();
         }
 
+
         public static AccessorDeclarationSyntax PropertyAccessor(PropertyAccessorType type)
         {
             var syntaxKind = type == PropertyAccessorType.Get ? SyntaxKind.GetAccessorDeclaration : SyntaxKind.SetAccessorDeclaration;
@@ -285,5 +311,65 @@ namespace DtoGenerator.Logic.Infrastructure
             Get,
             Set
         }
+
+        public static PropertyDeclarationSyntax GeneratePropertyDeclarationFromString(string property)
+        {
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(
+@"
+namespace MyNameSapce
+{
+    class MyDTO
+    {
+" + property + @"
+    }
+}");
+            return (PropertyDeclarationSyntax)((ClassDeclarationSyntax)((NamespaceDeclarationSyntax)((CompilationUnitSyntax)tree.GetRoot()).Members[0]).Members[0]).Members[0];
+        }
+
+
+        public static ExpressionSyntax GenerateAssignmentExpressionFromString(string expression)
+        {
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(
+@"
+namespace MyNameSapce
+{
+    class MyMapper
+    {
+        public override Expression<Func<MyEntities, MyDTO>> SelectorExpression
+        {
+            get
+            {
+                return ((Expression<Func<MyEntities, MyDTO>>)(p => new MyDTO()
+                {
+                    " + expression + @"
+                }));
+            }
+        }
+    }
+}");
+
+            return (ExpressionSyntax)tree.GetRoot().DescendantNodes().OfType<AssignmentExpressionSyntax>().FirstOrDefault();
+        }
+
+
+        public static ExpressionStatementSyntax AssignmentStatementFromString(string expression)
+        {
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(
+@"
+namespace MyNameSapce
+{
+    class MyMapper
+    {
+        public override void MapToModel(MyDTO dto, MyEntities model)
+        {
+            " + expression + @"
+        }
+    }
+}");
+
+            return (ExpressionStatementSyntax)tree.GetRoot().DescendantNodes().OfType<ExpressionStatementSyntax>().FirstOrDefault();
+        }
+
+
     }
 }

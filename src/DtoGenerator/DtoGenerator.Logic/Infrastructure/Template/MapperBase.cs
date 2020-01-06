@@ -35,6 +35,16 @@ namespace #Namespace#
             return Expression.Lambda<Func<TEntity, TDto>>(
                 Expression.MemberInit(body.NewExpression, bindings), param);
         }
+        public static TDto ToDTO<TEntity, TDto>(this TEntity entity,Expression<Func<TEntity, TDto>> expression)
+        {
+            return (new List<TEntity>() { entity }).AsQueryable().Select(expression).SingleOrDefault();
+        }
+
+        public static IQueryable<TDto> ToListDTO<TEntity, TDto>(this IQueryable<TEntity> entities,
+            Expression<Func<TEntity, TDto>> expression)
+        {
+            return entities.Select(expression);
+        }
 
         class ParameterReplaceVisitor : ExpressionVisitor
         {

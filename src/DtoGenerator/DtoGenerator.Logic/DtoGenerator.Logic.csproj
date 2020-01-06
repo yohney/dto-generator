@@ -112,6 +112,7 @@
     <Compile Include="Infrastructure\SolutionParser.cs" />
     <Compile Include="Infrastructure\SyntaxExtenders.cs" />
     <EmbeddedResource Include="Infrastructure\Template\MapperBase.cs" />
+    <EmbeddedResource Include="Infrastructure\Template\OutlineStyleCop.cs" />
     <Compile Include="Infrastructure\TreeProcessing\BaseDtoClassLocator.cs" />
     <Compile Include="Infrastructure\TreeProcessing\CustomCodePreserver.cs" />
     <Compile Include="Infrastructure\TreeProcessing\MapperRemover.cs" />
