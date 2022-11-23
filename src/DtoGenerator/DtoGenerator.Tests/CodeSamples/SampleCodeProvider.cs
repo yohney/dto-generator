@@ -21,7 +21,7 @@ namespace DtoGenerator.Tests.CodeSamples
 
         public static string EntityOnlySimpleProperties => GetManifestText(nameof(EntityOnlySimpleProperties));
         public static string EntityOnlySimplePropertiesDto => GetManifestText(nameof(EntityOnlySimplePropertiesDto));
-        
+
         public static string EntityWithCollectionProperties => GetManifestText(nameof(EntityWithCollectionProperties));
 
         public static string SampleTable1 => GetManifestText(nameof(SampleTable1));
@@ -30,9 +30,22 @@ namespace DtoGenerator.Tests.CodeSamples
 
         public static string NestedEntity => GetManifestText(nameof(NestedEntity));
 
+        public static string ClassWithoutNamespace => GetManifestTextWithFileStream(nameof(ClassWithoutNamespace));
+
         private static string GetManifestText(string name)
         {
             using (var stream = typeof(SampleCodeProvider).Assembly.GetManifestResourceStream($"DtoGenerator.Tests.CodeSamples.{name}.cs"))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
+
+        private static string GetManifestTextWithFileStream(string name)
+        {
+            using (var stream = new FileStream($@"../../CodeSamples/{name}.cs", FileMode.Open))
             {
                 using (var reader = new StreamReader(stream))
                 {

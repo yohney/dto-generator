@@ -162,7 +162,11 @@ namespace DtoGenerator.Logic.Infrastructure
 
             var result = new EntityMetadata();
             result.Name = classNode.Identifier.Text;
-            result.Namespace = namespaceNode.Name.ToString();
+
+            if (namespaceNode != null)
+            {
+                result.Namespace = namespaceNode.Name.ToString();
+            }
 
             if (classNode.BaseList != null && classNode.BaseList.Types.Count > 0)
             {
