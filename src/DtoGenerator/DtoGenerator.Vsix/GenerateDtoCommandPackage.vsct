@@ -39,6 +39,9 @@
       <Group guid="guidGenerateDtoCommandPackageCmdSet" id="MyMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE"/>
       </Group>
+      <Group guid="guidGenerateDtoCommandPackageCmdSet" id="MyMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+      </Group>
     </Groups>
 
     <!--Buttons section. -->
@@ -55,6 +58,7 @@
       <Button guid="guidGenerateDtoCommandPackageCmdSet" id="GenerateDtoCommandId" priority="0x0100" type="Button">
         <Parent guid="guidGenerateDtoCommandPackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
         <Strings>
           <ButtonText>Generate DTO...</ButtonText>
         </Strings>
