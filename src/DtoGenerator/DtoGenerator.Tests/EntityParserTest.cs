@@ -47,6 +47,16 @@ namespace DtoGenerator.Tests
         }
 
         [TestMethod]
+        public void EntityParser_ParseEntity_ClassWithoutNamespace()
+        {
+            var code = SampleCodeProvider.ClassWithoutNamespace;
+            var metadata = EntityParser.FromString(code);
+
+            Assert.IsTrue(metadata.Namespace == null);
+            Assert.IsTrue(metadata.Properties.Any(p => p.Name == "PropertyStringName" && p.IsSimpleProperty && p.Type == "string"));
+        }
+
+        [TestMethod]
         public void EntityParser_ParseEntity_WithCollectionProperties()
         {
             var code = SampleCodeProvider.EntityWithCollectionProperties;

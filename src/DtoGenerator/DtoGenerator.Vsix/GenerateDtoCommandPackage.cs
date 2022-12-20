@@ -40,6 +40,7 @@ namespace DtoGenerator.Vsix
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(GenerateDtoCommandPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
+    [ProvideAutoLoad("{F1536EF8-92EC-443C-9ED7-FDADF150DA82}")] //value of VSConstants' SolutionExists property
     public sealed class GenerateDtoCommandPackage : Package
     {
         /// <summary>
